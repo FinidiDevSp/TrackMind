@@ -5,6 +5,7 @@ const { spawn } = require("child_process");
 const kill = require("tree-kill");
 
 let pyProc = null;
+let viteProc = null;
 
 function startPython() {
     // Ruta al intérprete de Python del backend (en dev usamos el de la venv)
@@ -35,6 +36,25 @@ function startPython() {
     pyProc.on("exit", (code) => console.log("Python exit code:", code));
 }
 
+function startVite(onReady) {
+    const npmCmd = process.platform === "win32" ? "npm.cmd" : "npm";
+    viteProc = spawn(npmCmd, ["run", "dev"], {
+        cwd: path.join(__dirname, "..", "frontend"),
+        env: { ...process.env },
+    });
+
+    viteProc.stdout.on("data", (d) => {
+        const text = d.toString();
+        console.log("[VITE]", text);
+        if (onReady && text.includes("Local:")) {
+            onReady();
+            onReady = null;
+        }
+    });
+    viteProc.stderr.on("data", (d) => console.error("[VITE]", d.toString()));
+    viteProc.on("exit", (code) => console.log("Vite exit code:", code));
+}
+
 function createWindow() {
     const win = new BrowserWindow({
         width: 1000,
@@ -51,7 +71,9 @@ function createWindow() {
 
 app.whenReady().then(() => {
     startPython();
-    createWindow();
+    startVite(() => {
+        createWindow();
+    });
 
     app.on("activate", () => {
         if (BrowserWindow.getAllWindows().length === 0) createWindow();
@@ -65,5 +87,8 @@ app.on("window-all-closed", () => {
 app.on("before-quit", () => {
     if (pyProc && pyProc.pid) {
         kill(pyProc.pid);
+    }
+    if (viteProc && viteProc.pid) {
+        kill(viteProc.pid);
     }
 });
