@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import TopBar, { Tab } from './components/TopBar'
+import TopBar, { type Tab } from './components/TopBar'
 
 function App() {
   const [msg, setMsg] = useState('cargando...')
