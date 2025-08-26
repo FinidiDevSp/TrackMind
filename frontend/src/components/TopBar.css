@@ -2,11 +2,11 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  height: 48px;
-  padding: 0 16px;
+  padding: 8px 16px;
   background-color: #1f1f1f;
   color: #ffffff;
   width: 100%;
+  flex-wrap: wrap;
 }
 
 .topbar__logo {
@@ -18,6 +18,28 @@
   align-items: center;
   justify-content: center;
   overflow: hidden;
+}
+
+.topbar__nav {
+  display: flex;
+  gap: 16px;
+  flex: 1;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.topbar__tab {
+  background: none;
+  border: none;
+  color: inherit;
+  cursor: pointer;
+  padding: 8px 12px;
+  font-size: 0.9rem;
+}
+
+.topbar__tab--active {
+  border-bottom: 2px solid #646cff;
+  font-weight: bold;
 }
 
 .topbar__settings {
