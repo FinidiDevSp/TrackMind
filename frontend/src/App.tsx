@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react'
-import TopBar from './components/TopBar'
+import TopBar, { Tab } from './components/TopBar'
 
 function App() {
   const [msg, setMsg] = useState('cargando...')
+  const [activeTab, setActiveTab] = useState<Tab>('BEATPORT')
 
   useEffect(() => {
     fetch('/api/hello')
@@ -13,16 +14,23 @@ function App() {
 
   return (
     <>
-      <TopBar />
+      <TopBar activeTab={activeTab} onTabChange={setActiveTab} />
       <div style={{ fontFamily: 'system-ui, sans-serif', padding: 24 }}>
         <h1>MP3 Tool</h1>
         <p>
           Backend dice: <strong>{msg}</strong>
         </p>
-        <div className="text-boxes">
-          <input type="text" placeholder="Caja 1" />
-          <input type="text" placeholder="Caja 2" />
-        </div>
+        {activeTab === 'BEATPORT' && (
+          <div className="text-boxes">
+            <input type="text" placeholder="Caja 1" />
+            <input type="text" placeholder="Caja 2" />
+          </div>
+        )}
+        {activeTab === '1001TRACKLIST' && (
+          <label>Pantalla 1001TRACKLIST</label>
+        )}
+        {activeTab === 'BAN/UNBAN' && <label>Pantalla BAN/UNBAN</label>}
+        {activeTab === 'OTROS' && <label>Pantalla OTROS</label>}
       </div>
     </>
   )
