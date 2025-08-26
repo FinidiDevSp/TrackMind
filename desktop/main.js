@@ -3,6 +3,7 @@ const { app, BrowserWindow } = require("electron");
 const path = require("path");
 const { spawn } = require("child_process");
 const kill = require("tree-kill");
+const readline = require("readline");
 
 let pyProc = null;
 let viteProc = null;
@@ -51,16 +52,19 @@ function startVite(onReady) {
 
     viteProc.on("error", (err) => console.error("[VITE]", err));
 
-    viteProc.stdout.on("data", (d) => {
-        const text = d.toString();
-        console.log("[VITE]", text);
-        if (onReady && text.includes("Local:")) {
+    const rl = readline.createInterface({ input: viteProc.stdout });
+    rl.on("line", (line) => {
+        console.log("[VITE]", line);
+        if (onReady && line.includes("Local:")) {
             onReady();
             onReady = null;
         }
     });
     viteProc.stderr.on("data", (d) => console.error("[VITE]", d.toString()));
-    viteProc.on("exit", (code) => console.log("Vite exit code:", code));
+    viteProc.on("exit", (code) => {
+        rl.close();
+        console.log("Vite exit code:", code);
+    });
 }
 
 function createWindow() {
