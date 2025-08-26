@@ -38,10 +38,18 @@ function startPython() {
 
 function startVite(onReady) {
     const npmCmd = process.platform === "win32" ? "npm.cmd" : "npm";
-    viteProc = spawn(npmCmd, ["run", "dev"], {
-        cwd: path.join(__dirname, "..", "frontend"),
-        env: { ...process.env },
-    });
+    try {
+        viteProc = spawn(npmCmd, ["run", "dev"], {
+            cwd: path.join(__dirname, "..", "frontend"),
+            env: { ...process.env },
+            shell: true,
+        });
+    } catch (err) {
+        console.error("[VITE] failed to start:", err);
+        return;
+    }
+
+    viteProc.on("error", (err) => console.error("[VITE]", err));
 
     viteProc.stdout.on("data", (d) => {
         const text = d.toString();
