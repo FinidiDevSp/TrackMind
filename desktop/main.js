@@ -1,5 +1,5 @@
 // desktop/main.js
-const { app, BrowserWindow, dialog } = require("electron");
+const { app, BrowserWindow, dialog, Menu } = require("electron");
 const path = require("path");
 const { spawn } = require("child_process");
 const kill = require("tree-kill");
@@ -166,6 +166,7 @@ function createWindow() {
 }
 
 app.whenReady().then(async () => {
+    Menu.setApplicationMenu(null);
     // 1) Arranca backend + espera puerto
     startPython();
     try {
