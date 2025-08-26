@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import TopBar from './components/TopBar'
 
 function App() {
   const [msg, setMsg] = useState('cargando...')
@@ -11,10 +12,13 @@ function App() {
   }, [])
 
   return (
-    <div style={{fontFamily:'system-ui, sans-serif', padding: 24}}>
-      <h1>MP3 Tool</h1>
-      <p>Backend dice: <strong>{msg}</strong></p>
-    </div>
+    <>
+      <TopBar />
+      <div style={{fontFamily:'system-ui, sans-serif', padding: 24}}>
+        <h1>MP3 Tool</h1>
+        <p>Backend dice: <strong>{msg}</strong></p>
+      </div>
+    </>
   )
 }
 
