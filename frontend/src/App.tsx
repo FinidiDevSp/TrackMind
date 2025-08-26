@@ -14,9 +14,15 @@ function App() {
   return (
     <>
       <TopBar />
-      <div style={{fontFamily:'system-ui, sans-serif', padding: 24}}>
+      <div style={{ fontFamily: 'system-ui, sans-serif', padding: 24 }}>
         <h1>MP3 Tool</h1>
-        <p>Backend dice: <strong>{msg}</strong></p>
+        <p>
+          Backend dice: <strong>{msg}</strong>
+        </p>
+        <div className="text-boxes">
+          <input type="text" placeholder="Caja 1" />
+          <input type="text" placeholder="Caja 2" />
+        </div>
       </div>
     </>
   )
