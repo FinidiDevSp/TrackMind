@@ -1,0 +1,27 @@
+{
+	"version": "0.2.0",
+	"configurations": [
+		{
+			"type": "node",
+			"request": "launch",
+			"name": "Electron (desktop)",
+			"cwd": "${workspaceFolder}/desktop",
+			"runtimeExecutable": "npm",
+			"runtimeArgs": [
+				"run",
+				"dev"
+			],
+			"console": "integratedTerminal"
+		}
+	],
+	"compounds": [
+		{
+			"name": "Dev: Backend + Frontend + Desktop",
+			"configurations": [],
+			"preLaunchTask": "backend",
+			"dependsOn": [
+				"frontend"
+			]
+		}
+	]
+}
