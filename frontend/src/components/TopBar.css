@@ -1,0 +1,33 @@
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 48px;
+  padding: 0 16px;
+  background-color: #1f1f1f;
+  color: #ffffff;
+}
+
+.topbar__logo {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-color: #333333;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.topbar__settings {
+  background: none;
+  border: none;
+  color: inherit;
+  cursor: pointer;
+  padding: 4px;
+}
+
+.topbar__settings svg {
+  width: 24px;
+  height: 24px;
+}
