@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react'
 import TopBar, { type Tab } from './components/TopBar'
+import SettingsModal from './components/SettingsModal'
 
 function App() {
   const [msg, setMsg] = useState('cargando...')
   const [activeTab, setActiveTab] = useState<Tab>('BEATPORT')
+  const [settingsOpen, setSettingsOpen] = useState(false)
 
   useEffect(() => {
     fetch('/api/hello')
@@ -14,7 +16,11 @@ function App() {
 
   return (
     <>
-      <TopBar activeTab={activeTab} onTabChange={setActiveTab} />
+      <TopBar
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+        onSettingsClick={() => setSettingsOpen(true)}
+      />
       <div style={{ fontFamily: 'system-ui, sans-serif', padding: 24 }}>
         <h1>MP3 Tool</h1>
         <p>
@@ -32,6 +38,7 @@ function App() {
         {activeTab === 'BAN/UNBAN' && <label>Pantalla BAN/UNBAN</label>}
         {activeTab === 'OTROS' && <label>Pantalla OTROS</label>}
       </div>
+      {settingsOpen && <SettingsModal onClose={() => setSettingsOpen(false)} />}
     </>
   )
 }

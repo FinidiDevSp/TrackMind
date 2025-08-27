@@ -7,11 +7,12 @@ interface TopBarProps {
   logo?: ReactNode
   activeTab: Tab
   onTabChange: (tab: Tab) => void
+  onSettingsClick: () => void
 }
 
 const tabs: Tab[] = ['BEATPORT', '1001TRACKLIST', 'BAN/UNBAN', 'OTROS']
 
-const TopBar = ({ logo, activeTab, onTabChange }: TopBarProps) => {
+const TopBar = ({ logo, activeTab, onTabChange, onSettingsClick }: TopBarProps) => {
   return (
     <header className="topbar">
       <div className="topbar__logo">{logo}</div>
@@ -26,7 +27,7 @@ const TopBar = ({ logo, activeTab, onTabChange }: TopBarProps) => {
           </button>
         ))}
       </nav>
-      <button className="topbar__settings" aria-label="Abrir configuración">
+      <button className="topbar__settings" aria-label="Abrir configuración" onClick={onSettingsClick}>
         <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
           <path
             fillRule="evenodd"
