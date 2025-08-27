@@ -36,6 +36,9 @@
   cursor: pointer;
   padding: 8px 12px;
   font-size: 0.9rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
 }
 
 .topbar__tab:focus,
