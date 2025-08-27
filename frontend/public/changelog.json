@@ -1,0 +1,92 @@
+[
+  {
+    "hash": "750483a",
+    "date": "2025-08-26",
+    "message": "fix! errores"
+  },
+  {
+    "hash": "c71cee6",
+    "date": "2025-08-26",
+    "message": "feat! add texts and functionality to topbar"
+  },
+  {
+    "hash": "b84e450",
+    "date": "2025-08-26",
+    "message": "feat: add responsive navigation screens"
+  },
+  {
+    "hash": "f841b0b",
+    "date": "2025-08-26",
+    "message": "fix! modify frontend design to dark gray"
+  },
+  {
+    "hash": "46b6261",
+    "date": "2025-08-26",
+    "message": "feat: dark theme with input boxes"
+  },
+  {
+    "hash": "b133f59",
+    "date": "2025-08-26",
+    "message": "fix topbar positioning and menu removal"
+  },
+  {
+    "hash": "bbb6c79",
+    "date": "2025-08-26",
+    "message": "fix: ensure top bar spans full width and hide default menu"
+  },
+  {
+    "hash": "1c9d0a6",
+    "date": "2025-08-26",
+    "message": "fix! apertura del programa"
+  },
+  {
+    "hash": "85777ae",
+    "date": "2025-08-26",
+    "message": "debug! createwindow not called"
+  },
+  {
+    "hash": "dffd9a8",
+    "date": "2025-08-26",
+    "message": "fix: ensure createWindow triggers after Vite ready"
+  },
+  {
+    "hash": "f79a7cd",
+    "date": "2025-08-26",
+    "message": "fix spawn einval error in startvite"
+  },
+  {
+    "hash": "338d0f5",
+    "date": "2025-08-26",
+    "message": "fix: run vite via shell to avoid spawn error"
+  },
+  {
+    "hash": "641012e",
+    "date": "2025-08-26",
+    "message": "fix! blank app menu issue"
+  },
+  {
+    "hash": "f197119",
+    "date": "2025-08-26",
+    "message": "Start Vite server alongside Electron app"
+  },
+  {
+    "hash": "345b8ce",
+    "date": "2025-08-26",
+    "message": "feat! add topbar and side logo layout"
+  },
+  {
+    "hash": "58ebfa3",
+    "date": "2025-08-26",
+    "message": "refactor: allow custom logo in top bar"
+  },
+  {
+    "hash": "4e6be64",
+    "date": "2025-08-26",
+    "message": "new! subida del proyecto inicial"
+  },
+  {
+    "hash": "c993f0d",
+    "date": "2025-08-26",
+    "message": "Initial commit"
+  }
+]
