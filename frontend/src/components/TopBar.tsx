@@ -1,6 +1,6 @@
-import type { ReactNode } from 'react'
+import { useState, type ReactNode, type KeyboardEvent } from 'react'
 import './TopBar.css'
-import { FaMusic, FaList, FaBan, FaEllipsisH } from 'react-icons/fa'
+import { FaMusic, FaList, FaBan, FaEllipsisH, FaBars } from 'react-icons/fa'
 import type { IconType } from 'react-icons'
 
 export type Tab = 'BEATPORT' | '1001TRACKLIST' | 'BAN/UNBAN' | 'OTROS'
@@ -22,17 +22,43 @@ const tabIcons: Record<Tab, IconType> = {
 }
 
 const TopBar = ({ logo, activeTab, onTabChange, onSettingsClick }: TopBarProps) => {
+  const [isMenuOpen, setIsMenuOpen] = useState(false)
+
+  const toggleMenu = () => setIsMenuOpen(prev => !prev)
+
+  const handleKeyDown = (e: KeyboardEvent) => {
+    if (e.key === 'Escape') {
+      setIsMenuOpen(false)
+    }
+  }
+
   return (
     <header className="topbar">
       <div className="topbar__logo">{logo}</div>
-      <nav className="topbar__nav">
+      <button
+        className="topbar__menu-toggle"
+        aria-label={isMenuOpen ? 'Cerrar menú' : 'Abrir menú'}
+        aria-expanded={isMenuOpen}
+        aria-controls="topbar-menu"
+        onClick={toggleMenu}
+      >
+        <FaBars />
+      </button>
+      <nav
+        id="topbar-menu"
+        className={`topbar__nav${isMenuOpen ? ' topbar__nav--open' : ''}`}
+        onKeyDown={handleKeyDown}
+      >
         {tabs.map(tab => {
           const Icon = tabIcons[tab]
           return (
             <button
               key={tab}
               className={`topbar__tab${activeTab === tab ? ' topbar__tab--active' : ''}`}
-              onClick={() => onTabChange(tab)}
+              onClick={() => {
+                onTabChange(tab)
+                setIsMenuOpen(false)
+              }}
             >
               <Icon />
               {tab}
