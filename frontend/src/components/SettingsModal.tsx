@@ -9,11 +9,13 @@ interface ChangelogEntry {
 
 interface SettingsModalProps {
   onClose: () => void
+  theme: 'light' | 'dark'
+  onThemeChange: (theme: 'light' | 'dark') => void
 }
 
 type Tab = 'CHANGELOG' | 'QUICK TAG CUSTOM' | 'GENERAL'
 
-const SettingsModal = ({ onClose }: SettingsModalProps) => {
+const SettingsModal = ({ onClose, theme, onThemeChange }: SettingsModalProps) => {
   const [activeTab, setActiveTab] = useState<Tab>('CHANGELOG')
   const [entries, setEntries] = useState<ChangelogEntry[]>([])
 
@@ -45,7 +47,7 @@ const SettingsModal = ({ onClose }: SettingsModalProps) => {
           ))}
         </div>
         <div className="settings-content">
-          {activeTab === 'CHANGELOG' ? (
+          {activeTab === 'CHANGELOG' && (
             <ul className="changelog-list">
               {entries.map(e => (
                 <li key={e.hash}>
@@ -54,8 +56,19 @@ const SettingsModal = ({ onClose }: SettingsModalProps) => {
                 </li>
               ))}
             </ul>
-          ) : (
-            <div className="placeholder">Coming soon...</div>
+          )}
+          {activeTab === 'QUICK TAG CUSTOM' && <div className="placeholder">Coming soon...</div>}
+          {activeTab === 'GENERAL' && (
+            <div className="theme-toggle">
+              <label>
+                <input
+                  type="checkbox"
+                  checked={theme === 'dark'}
+                  onChange={e => onThemeChange(e.target.checked ? 'dark' : 'light')}
+                />
+                Dark mode
+              </label>
+            </div>
           )}
         </div>
       </div>

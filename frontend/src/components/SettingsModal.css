@@ -9,8 +9,8 @@
 }
 
 .settings-modal {
-  background: #1f1f1f;
-  color: #fff;
+  background: var(--surface-color);
+  color: var(--text-color);
   width: 600px;
   max-width: 90%;
   border-radius: 8px;
@@ -29,7 +29,7 @@
   top: 0;
   background: none;
   border: none;
-  color: #fff;
+  color: var(--text-color);
   font-size: 24px;
   cursor: pointer;
 }
@@ -44,14 +44,14 @@
   flex: 1;
   background: none;
   border: none;
-  color: #888;
+  color: var(--muted-color);
   padding: 8px 12px;
   cursor: pointer;
 }
 
 .settings-tabs button.active {
-  color: #fff;
-  border-bottom: 2px solid #646cff;
+  color: var(--text-color);
+  border-bottom: 2px solid var(--accent-color);
 }
 
 .settings-content {
@@ -70,12 +70,22 @@
 }
 
 .changelog-date {
-  color: #888;
+  color: var(--muted-color);
   margin-right: 8px;
   font-size: 0.8rem;
 }
 
 .placeholder {
-  color: #888;
+  color: var(--muted-color);
   text-align: center;
+}
+
+.theme-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.theme-toggle input[type='checkbox'] {
+  accent-color: var(--accent-color);
 }
