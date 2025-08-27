@@ -10,6 +10,7 @@
     "electron": "^31.0.0"
   },
   "dependencies": {
+    "react-icons": "^5.5.0",
     "tree-kill": "^1.2.2"
   }
 }
