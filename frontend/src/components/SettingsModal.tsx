@@ -18,6 +18,7 @@ type Tab = 'CHANGELOG' | 'QUICK TAG CUSTOM' | 'GENERAL'
 const SettingsModal = ({ onClose, theme, onThemeChange }: SettingsModalProps) => {
   const [activeTab, setActiveTab] = useState<Tab>('CHANGELOG')
   const [entries, setEntries] = useState<ChangelogEntry[]>([])
+  const [isClosing, setIsClosing] = useState(false)
 
   useEffect(() => {
     fetch('/changelog.json')
@@ -26,12 +27,17 @@ const SettingsModal = ({ onClose, theme, onThemeChange }: SettingsModalProps) =>
       .catch(() => setEntries([]))
   }, [])
 
+  const handleClose = () => {
+    setIsClosing(true)
+    setTimeout(onClose, 200)
+  }
+
   return (
-    <div className="settings-overlay">
-      <div className="settings-modal">
+    <div className={`settings-overlay${isClosing ? ' closing' : ''}`}>
+      <div className={`settings-modal${isClosing ? ' closing' : ''}`}>
         <div className="settings-header">
           <h2>SETTINGS</h2>
-          <button className="settings-close" onClick={onClose} aria-label="Cerrar">
+          <button className="settings-close" onClick={handleClose} aria-label="Cerrar">
             &times;
           </button>
         </div>
