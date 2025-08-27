@@ -1,5 +1,7 @@
 import type { ReactNode } from 'react'
 import './TopBar.css'
+import { FaMusic, FaList, FaBan, FaEllipsisH } from 'react-icons/fa'
+import type { IconType } from 'react-icons'
 
 export type Tab = 'BEATPORT' | '1001TRACKLIST' | 'BAN/UNBAN' | 'OTROS'
 
@@ -12,20 +14,31 @@ interface TopBarProps {
 
 const tabs: Tab[] = ['BEATPORT', '1001TRACKLIST', 'BAN/UNBAN', 'OTROS']
 
+const tabIcons: Record<Tab, IconType> = {
+  BEATPORT: FaMusic,
+  '1001TRACKLIST': FaList,
+  'BAN/UNBAN': FaBan,
+  OTROS: FaEllipsisH,
+}
+
 const TopBar = ({ logo, activeTab, onTabChange, onSettingsClick }: TopBarProps) => {
   return (
     <header className="topbar">
       <div className="topbar__logo">{logo}</div>
       <nav className="topbar__nav">
-        {tabs.map(tab => (
-          <button
-            key={tab}
-            className={`topbar__tab${activeTab === tab ? ' topbar__tab--active' : ''}`}
-            onClick={() => onTabChange(tab)}
-          >
-            {tab}
-          </button>
-        ))}
+        {tabs.map(tab => {
+          const Icon = tabIcons[tab]
+          return (
+            <button
+              key={tab}
+              className={`topbar__tab${activeTab === tab ? ' topbar__tab--active' : ''}`}
+              onClick={() => onTabChange(tab)}
+            >
+              <Icon />
+              {tab}
+            </button>
+          )
+        })}
       </nav>
       <button className="topbar__settings" aria-label="Abrir configuración" onClick={onSettingsClick}>
         <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
