@@ -35,7 +35,8 @@
   color: inherit;
   cursor: pointer;
   padding: 8px 12px;
-  font-size: 0.9rem;
+  font-size: 1rem;
+  font-weight: 500;
   display: inline-flex;
   align-items: center;
   gap: 4px;
@@ -48,7 +49,7 @@
 
 .topbar__tab--active {
   border-bottom: 2px solid var(--accent-color);
-  font-weight: bold;
+  font-weight: 600;
 }
 
 .topbar__settings {

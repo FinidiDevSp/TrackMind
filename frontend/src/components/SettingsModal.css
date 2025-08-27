@@ -23,6 +23,12 @@
   margin-bottom: 16px;
 }
 
+.settings-header h2 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0;
+}
+
 .settings-close {
   position: absolute;
   right: 0;
@@ -47,11 +53,13 @@
   color: var(--muted-color);
   padding: 8px 12px;
   cursor: pointer;
+  font-weight: 500;
 }
 
 .settings-tabs button.active {
   color: var(--text-color);
   border-bottom: 2px solid var(--accent-color);
+  font-weight: 600;
 }
 
 .settings-content {
