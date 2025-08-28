@@ -8,6 +8,7 @@ const TracklistTab = () => {
   const [tracks, setTracks] = useState<Track[]>(tracklists[0]?.tracks ?? [])
   const [loading, setLoading] = useState(false)
   const [minEnergy, setMinEnergy] = useState(0)
+  const [searchTerm, setSearchTerm] = useState('')
 
   const handleSelect = (id: string) => {
     setSelectedId(id)
@@ -25,6 +26,9 @@ const TracklistTab = () => {
   }, [selectedId])
 
   const filteredTracks = tracks.filter(t => t.energy >= minEnergy)
+  const filteredTracklists = tracklists.filter(tl =>
+    tl.name.toLowerCase().includes(searchTerm.toLowerCase())
+  )
 
   const renderStars = (count: number) => {
     return Array.from({ length: 5 }, (_, i) =>
@@ -35,8 +39,15 @@ const TracklistTab = () => {
   return (
     <div className="tracklist-container">
       <aside className="tracklists-panel">
+        <input
+          className="search-input"
+          type="text"
+          placeholder="Buscar..."
+          value={searchTerm}
+          onChange={e => setSearchTerm(e.target.value)}
+        />
         <ul>
-          {tracklists.map(tl => (
+          {filteredTracklists.map(tl => (
             <li
               key={tl.id}
               className={tl.id === selectedId ? 'active' : ''}
