@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import './SettingsModal.css'
 import { useTheme } from '../theme/ThemeContext'
 
@@ -19,6 +19,10 @@ const SettingsModal = ({ onClose }: SettingsModalProps) => {
   const [entries, setEntries] = useState<ChangelogEntry[]>([])
   const [isClosing, setIsClosing] = useState(false)
   const { theme, setTheme } = useTheme()
+  const openerRef = useRef<HTMLElement | null>(
+    document.activeElement instanceof HTMLElement ? document.activeElement : null
+  )
+  const modalRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     fetch('/changelog.json')
@@ -27,13 +31,65 @@ const SettingsModal = ({ onClose }: SettingsModalProps) => {
       .catch(() => setEntries([]))
   }, [])
 
+  useEffect(() => {
+    const node = modalRef.current
+    if (!node) return
+
+    const focusableSelectors = [
+      'a[href]',
+      'button:not([disabled])',
+      'textarea:not([disabled])',
+      'input:not([type="hidden"]):not([disabled])',
+      'select:not([disabled])',
+      '[tabindex]:not([tabindex="-1"])'
+    ]
+
+    const getFocusable = () =>
+      Array.from(
+        node.querySelectorAll<HTMLElement>(focusableSelectors.join(','))
+      )
+
+    const focusables = getFocusable()
+    focusables[0]?.focus()
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key !== 'Tab') return
+      const elems = getFocusable()
+      const first = elems[0]
+      const last = elems[elems.length - 1]
+
+      if (e.shiftKey) {
+        if (document.activeElement === first) {
+          e.preventDefault()
+          last?.focus()
+        }
+      } else {
+        if (document.activeElement === last) {
+          e.preventDefault()
+          first?.focus()
+        }
+      }
+    }
+
+    node.addEventListener('keydown', handleKeyDown)
+    return () => node.removeEventListener('keydown', handleKeyDown)
+  }, [])
+
   const handleClose = () => {
     setIsClosing(true)
-    setTimeout(onClose, 200)
+    setTimeout(() => {
+      onClose()
+      openerRef.current?.focus()
+    }, 200)
   }
 
   return (
-    <div className={`settings-overlay${isClosing ? ' closing' : ''}`}>
+    <div
+      ref={modalRef}
+      className={`settings-overlay${isClosing ? ' closing' : ''}`}
+      role="dialog"
+      aria-modal="true"
+    >
       <div className={`settings-modal${isClosing ? ' closing' : ''}`}>
         <div className="settings-header">
           <h2>SETTINGS</h2>
