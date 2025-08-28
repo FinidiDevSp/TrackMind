@@ -8,6 +8,8 @@ export interface Track {
   genre: string
   year: number
   type: string
+  imageUrl: string
+  previewUrl: string
 }
 
 export interface Tracklist {
@@ -31,6 +33,8 @@ export const tracklists: Tracklist[] = [
         genre: 'Pumping House',
         year: 2023,
         type: 'Original Mix',
+        imageUrl: 'https://picsum.photos/seed/t1/200/200',
+        previewUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3',
       },
       {
         id: 't2',
@@ -42,6 +46,8 @@ export const tracklists: Tracklist[] = [
         genre: 'Techno',
         year: 2024,
         type: 'Remix',
+        imageUrl: 'https://picsum.photos/seed/t2/200/200',
+        previewUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3',
       },
       {
         id: 't3',
@@ -53,6 +59,8 @@ export const tracklists: Tracklist[] = [
         genre: 'Trance',
         year: 2023,
         type: 'Bootleg',
+        imageUrl: 'https://picsum.photos/seed/t3/200/200',
+        previewUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3',
       },
     ],
   },
@@ -70,6 +78,8 @@ export const tracklists: Tracklist[] = [
         genre: 'House',
         year: 2022,
         type: 'Original Mix',
+        imageUrl: 'https://picsum.photos/seed/t4/200/200',
+        previewUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3',
       },
       {
         id: 't5',
@@ -81,6 +91,8 @@ export const tracklists: Tracklist[] = [
         genre: 'Trance',
         year: 2024,
         type: 'Bootleg',
+        imageUrl: 'https://picsum.photos/seed/t5/200/200',
+        previewUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3',
       },
     ],
   },
