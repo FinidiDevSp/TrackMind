@@ -1,4 +1,4 @@
-import { useState, type ReactNode, type KeyboardEvent } from 'react'
+import { useState, type ReactNode, type KeyboardEvent, useRef } from 'react'
 import './TopBar.css'
 import { FaMusic, FaList, FaBan, FaEllipsisH, FaBars } from 'react-icons/fa'
 import type { IconType } from 'react-icons'
@@ -23,12 +23,25 @@ const tabIcons: Record<Tab, IconType> = {
 
 const TopBar = ({ logo, activeTab, onTabChange, onSettingsClick }: TopBarProps) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const tabRefs = useRef<Array<HTMLButtonElement | null>>([])
 
   const toggleMenu = () => setIsMenuOpen(prev => !prev)
 
   const handleKeyDown = (e: KeyboardEvent) => {
     if (e.key === 'Escape') {
       setIsMenuOpen(false)
+      return
+    }
+    if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+      e.preventDefault()
+      const currentIndex = tabs.indexOf(activeTab)
+      const nextIndex =
+        e.key === 'ArrowRight'
+          ? (currentIndex + 1) % tabs.length
+          : (currentIndex - 1 + tabs.length) % tabs.length
+      const nextTab = tabs[nextIndex]
+      onTabChange(nextTab)
+      tabRefs.current[nextIndex]?.focus()
     }
   }
 
@@ -48,17 +61,22 @@ const TopBar = ({ logo, activeTab, onTabChange, onSettingsClick }: TopBarProps) 
         id="topbar-menu"
         className={`topbar__nav${isMenuOpen ? ' topbar__nav--open' : ''}`}
         onKeyDown={handleKeyDown}
+        role="tablist"
       >
-        {tabs.map(tab => {
+        {tabs.map((tab, index) => {
           const Icon = tabIcons[tab]
           return (
             <button
               key={tab}
+              ref={el => (tabRefs.current[index] = el)}
               className={`topbar__tab${activeTab === tab ? ' topbar__tab--active' : ''}`}
               onClick={() => {
                 onTabChange(tab)
                 setIsMenuOpen(false)
               }}
+              role="tab"
+              tabIndex={activeTab === tab ? 0 : -1}
+              aria-selected={activeTab === tab}
             >
               <Icon />
               {tab}
