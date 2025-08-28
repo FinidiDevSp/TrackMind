@@ -125,3 +125,53 @@
   font-size: 0.8em;
   display: inline-block;
 }
+
+.mobile-controls {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .tracklists-panel,
+  .filter-panel {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    width: 80%;
+    max-width: 300px;
+    background-color: #222;
+    overflow-y: auto;
+    z-index: 1000;
+    transition: transform 0.3s ease;
+    visibility: hidden;
+    pointer-events: none;
+  }
+
+  .tracklists-panel {
+    left: 0;
+    transform: translateX(-100%);
+  }
+
+  .tracklists-panel.open {
+    transform: translateX(0);
+    visibility: visible;
+    pointer-events: auto;
+  }
+
+  .filter-panel {
+    right: 0;
+    transform: translateX(100%);
+  }
+
+  .filter-panel.open {
+    transform: translateX(0);
+    visibility: visible;
+    pointer-events: auto;
+  }
+
+  .mobile-controls {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+}
