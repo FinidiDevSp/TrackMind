@@ -33,6 +33,28 @@
   flex: 1;
 }
 
+.tracks-panel th {
+  position: sticky;
+  top: 0;
+  background-color: #222;
+}
+
+.tracks-panel th.sortable {
+  cursor: pointer;
+}
+
+.tracks-panel th.sort-asc::after {
+  content: '▲';
+  margin-left: 4px;
+  font-size: 0.7em;
+}
+
+.tracks-panel th.sort-desc::after {
+  content: '▼';
+  margin-left: 4px;
+  font-size: 0.7em;
+}
+
 .fade-in {
   opacity: 0;
   animation: fadeIn 0.5s forwards;
