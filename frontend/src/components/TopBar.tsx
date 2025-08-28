@@ -68,7 +68,9 @@ const TopBar = ({ logo, activeTab, onTabChange, onSettingsClick }: TopBarProps) 
           return (
             <button
               key={tab}
-              ref={el => (tabRefs.current[index] = el)}
+              ref={el => {
+                tabRefs.current[index] = el
+              }}
               className={`topbar__tab${activeTab === tab ? ' topbar__tab--active' : ''}`}
               onClick={() => {
                 onTabChange(tab)
