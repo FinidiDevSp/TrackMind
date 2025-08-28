@@ -33,12 +33,6 @@
   flex: 1;
 }
 
-.tracks-panel th {
-  position: sticky;
-  top: 0;
-  background-color: #222;
-}
-
 .tracks-panel th.sortable {
   cursor: pointer;
 }
