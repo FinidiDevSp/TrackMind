@@ -27,6 +27,8 @@ const TracklistTab = () => {
   const [sortBy, setSortBy] = useState<SortKey>('index')
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc')
   const [expandedTrack, setExpandedTrack] = useState<string | null>(null)
+  const [showTracklists, setShowTracklists] = useState(false)
+  const [showFilters, setShowFilters] = useState(false)
 
   const handleSelect = (id: string) => {
     setSelectedId(id)
@@ -86,7 +88,7 @@ const TracklistTab = () => {
 
   return (
     <div className="tracklist-container">
-      <aside className="tracklists-panel">
+      <aside className={`tracklists-panel ${showTracklists ? 'open' : ''}`}>
         <input
           className="search-input"
           type="text"
@@ -107,6 +109,10 @@ const TracklistTab = () => {
         </ul>
       </aside>
       <section className="tracks-panel">
+        <div className="mobile-controls">
+          <button onClick={() => setShowTracklists(prev => !prev)}>Listas</button>
+          <button onClick={() => setShowFilters(prev => !prev)}>Filtros</button>
+        </div>
         {loading ? (
           <div className="loading">Cargando...</div>
         ) : (
@@ -206,7 +212,7 @@ const TracklistTab = () => {
           </table>
         )}
       </section>
-      <aside className="filter-panel">
+      <aside className={`filter-panel ${showFilters ? 'open' : ''}`}>
         <label>
           Energía mínima
           <select value={minEnergy} onChange={e => setMinEnergy(Number(e.target.value))}>
