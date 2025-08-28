@@ -1,7 +1,21 @@
 import { useState, useEffect, Fragment } from 'react'
 import './TracklistTab.css'
 import { tracklists, type Track } from './sampleData'
-import { FaStar, FaRegStar } from 'react-icons/fa'
+
+const moodColors: Record<string, string> = {
+  'mood 1': '#ff6b6b',
+  'mood 2': '#4dabf7',
+  'mood 3': '#51cf66',
+}
+
+const EnergyBar = ({ energy }: { energy: number }) => {
+  const percentage = (energy / 5) * 100
+  return (
+    <div className="energy-bar">
+      <div className="energy-bar-fill" style={{ width: `${percentage}%` }} />
+    </div>
+  )
+}
 
 const TracklistTab = () => {
   const [selectedId, setSelectedId] = useState(tracklists[0]?.id)
@@ -56,12 +70,6 @@ const TracklistTab = () => {
   const filteredTracklists = tracklists.filter(tl =>
     tl.name.toLowerCase().includes(searchTerm.toLowerCase())
   )
-
-  const renderStars = (count: number) => {
-    return Array.from({ length: 5 }, (_, i) =>
-      i < count ? <FaStar key={i} color="#ffc107" /> : <FaRegStar key={i} color="#555" />
-    )
-  }
 
   const handleSort = (column: SortKey) => {
     if (sortBy === column) {
@@ -167,8 +175,17 @@ const TracklistTab = () => {
                       {track.artists} - {track.title}
                     </td>
                     <td>{track.custom}</td>
-                    <td>{track.mood}</td>
-                    <td>{renderStars(track.energy)}</td>
+                    <td>
+                      <span
+                        className="mood-badge"
+                        style={{ backgroundColor: moodColors[track.mood] }}
+                      >
+                        {track.mood}
+                      </span>
+                    </td>
+                    <td>
+                      <EnergyBar energy={track.energy} />
+                    </td>
                     <td>{track.genre}</td>
                     <td>{track.year}</td>
                     <td>{track.type}</td>
