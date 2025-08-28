@@ -9,6 +9,9 @@ const TracklistTab = () => {
   const [loading, setLoading] = useState(false)
   const [minEnergy, setMinEnergy] = useState(0)
   const [searchTerm, setSearchTerm] = useState('')
+  type SortKey = 'index' | 'theme' | 'custom' | 'mood' | 'energy' | 'genre' | 'year' | 'type'
+  const [sortBy, setSortBy] = useState<SortKey>('index')
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc')
 
   const handleSelect = (id: string) => {
     setSelectedId(id)
@@ -26,6 +29,29 @@ const TracklistTab = () => {
   }, [selectedId])
 
   const filteredTracks = tracks.filter(t => t.energy >= minEnergy)
+  const sortedTracks = (() => {
+    const arr = [...filteredTracks]
+    if (sortBy === 'index') {
+      return sortDirection === 'asc' ? arr : arr.reverse()
+    }
+    return arr.sort((a, b) => {
+      let aVal: string | number
+      let bVal: string | number
+      if (sortBy === 'theme') {
+        aVal = `${a.artists} ${a.title}`
+        bVal = `${b.artists} ${b.title}`
+      } else {
+        aVal = a[sortBy]
+        bVal = b[sortBy]
+      }
+      if (typeof aVal === 'number' && typeof bVal === 'number') {
+        return sortDirection === 'asc' ? aVal - bVal : bVal - aVal
+      }
+      return sortDirection === 'asc'
+        ? String(aVal).localeCompare(String(bVal))
+        : String(bVal).localeCompare(String(aVal))
+    })
+  })()
   const filteredTracklists = tracklists.filter(tl =>
     tl.name.toLowerCase().includes(searchTerm.toLowerCase())
   )
@@ -34,6 +60,15 @@ const TracklistTab = () => {
     return Array.from({ length: 5 }, (_, i) =>
       i < count ? <FaStar key={i} color="#ffc107" /> : <FaRegStar key={i} color="#555" />
     )
+  }
+
+  const handleSort = (column: SortKey) => {
+    if (sortBy === column) {
+      setSortDirection(prev => (prev === 'asc' ? 'desc' : 'asc'))
+    } else {
+      setSortBy(column)
+      setSortDirection('asc')
+    }
   }
 
   return (
@@ -65,21 +100,63 @@ const TracklistTab = () => {
           <table className="fade-in">
             <thead>
               <tr>
-                <th>#</th>
-                <th>Tema</th>
-                <th>Custom</th>
-                <th>Mood</th>
-                <th>Energy</th>
-                <th>Género</th>
-                <th>Año</th>
-                <th>Tipo</th>
+                <th
+                  onClick={() => handleSort('index')}
+                  className={`sortable ${sortBy === 'index' ? `sort-${sortDirection}` : ''}`}
+                >
+                  #
+                </th>
+                <th
+                  onClick={() => handleSort('theme')}
+                  className={`sortable ${sortBy === 'theme' ? `sort-${sortDirection}` : ''}`}
+                >
+                  Tema
+                </th>
+                <th
+                  onClick={() => handleSort('custom')}
+                  className={`sortable ${sortBy === 'custom' ? `sort-${sortDirection}` : ''}`}
+                >
+                  Custom
+                </th>
+                <th
+                  onClick={() => handleSort('mood')}
+                  className={`sortable ${sortBy === 'mood' ? `sort-${sortDirection}` : ''}`}
+                >
+                  Mood
+                </th>
+                <th
+                  onClick={() => handleSort('energy')}
+                  className={`sortable ${sortBy === 'energy' ? `sort-${sortDirection}` : ''}`}
+                >
+                  Energy
+                </th>
+                <th
+                  onClick={() => handleSort('genre')}
+                  className={`sortable ${sortBy === 'genre' ? `sort-${sortDirection}` : ''}`}
+                >
+                  Género
+                </th>
+                <th
+                  onClick={() => handleSort('year')}
+                  className={`sortable ${sortBy === 'year' ? `sort-${sortDirection}` : ''}`}
+                >
+                  Año
+                </th>
+                <th
+                  onClick={() => handleSort('type')}
+                  className={`sortable ${sortBy === 'type' ? `sort-${sortDirection}` : ''}`}
+                >
+                  Tipo
+                </th>
               </tr>
             </thead>
             <tbody>
-              {filteredTracks.map((track, idx) => (
+              {sortedTracks.map((track, idx) => (
                 <tr key={track.id}>
                   <td>{idx + 1}</td>
-                  <td>{track.artists} - {track.title}</td>
+                  <td>
+                    {track.artists} - {track.title}
+                  </td>
                   <td>{track.custom}</td>
                   <td>{track.mood}</td>
                   <td>{renderStars(track.energy)}</td>
