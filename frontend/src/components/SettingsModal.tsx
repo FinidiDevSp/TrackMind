@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import './SettingsModal.css'
+import { useTheme } from '../theme/ThemeContext'
 
 interface ChangelogEntry {
   hash: string
@@ -9,16 +10,15 @@ interface ChangelogEntry {
 
 interface SettingsModalProps {
   onClose: () => void
-  theme: 'light' | 'dark'
-  onThemeChange: (theme: 'light' | 'dark') => void
 }
 
 type Tab = 'CHANGELOG' | 'QUICK TAG CUSTOM' | 'GENERAL'
 
-const SettingsModal = ({ onClose, theme, onThemeChange }: SettingsModalProps) => {
+const SettingsModal = ({ onClose }: SettingsModalProps) => {
   const [activeTab, setActiveTab] = useState<Tab>('CHANGELOG')
   const [entries, setEntries] = useState<ChangelogEntry[]>([])
   const [isClosing, setIsClosing] = useState(false)
+  const { theme, setTheme } = useTheme()
 
   useEffect(() => {
     fetch('/changelog.json')
@@ -70,7 +70,7 @@ const SettingsModal = ({ onClose, theme, onThemeChange }: SettingsModalProps) =>
                 <input
                   type="checkbox"
                   checked={theme === 'dark'}
-                  onChange={e => onThemeChange(e.target.checked ? 'dark' : 'light')}
+                  onChange={e => setTheme(e.target.checked ? 'dark' : 'light')}
                 />
                 Dark mode
               </label>

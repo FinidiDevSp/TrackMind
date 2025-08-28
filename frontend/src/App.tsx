@@ -6,7 +6,6 @@ function App() {
   const [msg, setMsg] = useState('cargando...')
   const [activeTab, setActiveTab] = useState<Tab>('BEATPORT')
   const [settingsOpen, setSettingsOpen] = useState(false)
-  const [theme, setTheme] = useState<'light' | 'dark'>('light')
 
   useEffect(() => {
     fetch('/api/hello')
@@ -15,19 +14,6 @@ function App() {
       .catch(() => setMsg('Error conectando con el backend'))
   }, [])
 
-  useEffect(() => {
-    const stored = (localStorage.getItem('theme') as 'light' | 'dark' | null)
-    if (stored) {
-      setTheme(stored)
-    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-      setTheme('dark')
-    }
-  }, [])
-
-  useEffect(() => {
-    document.documentElement.dataset.theme = theme
-    localStorage.setItem('theme', theme)
-  }, [theme])
 
   return (
     <>
@@ -56,8 +42,6 @@ function App() {
       {settingsOpen && (
         <SettingsModal
           onClose={() => setSettingsOpen(false)}
-          theme={theme}
-          onThemeChange={setTheme}
         />
       )}
     </>
