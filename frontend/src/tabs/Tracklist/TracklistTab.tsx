@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Fragment } from 'react'
 import './TracklistTab.css'
 import { tracklists, type Track } from './sampleData'
 import { FaStar, FaRegStar } from 'react-icons/fa'
@@ -12,6 +12,7 @@ const TracklistTab = () => {
   type SortKey = 'index' | 'theme' | 'custom' | 'mood' | 'energy' | 'genre' | 'year' | 'type'
   const [sortBy, setSortBy] = useState<SortKey>('index')
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc')
+  const [expandedTrack, setExpandedTrack] = useState<string | null>(null)
 
   const handleSelect = (id: string) => {
     setSelectedId(id)
@@ -69,6 +70,10 @@ const TracklistTab = () => {
       setSortBy(column)
       setSortDirection('asc')
     }
+  }
+
+  const toggleExpand = (id: string) => {
+    setExpandedTrack(prev => (prev === id ? null : id))
   }
 
   return (
@@ -152,18 +157,33 @@ const TracklistTab = () => {
             </thead>
             <tbody>
               {sortedTracks.map((track, idx) => (
-                <tr key={track.id}>
-                  <td>{idx + 1}</td>
-                  <td>
-                    {track.artists} - {track.title}
-                  </td>
-                  <td>{track.custom}</td>
-                  <td>{track.mood}</td>
-                  <td>{renderStars(track.energy)}</td>
-                  <td>{track.genre}</td>
-                  <td>{track.year}</td>
-                  <td>{track.type}</td>
-                </tr>
+                <Fragment key={track.id}>
+                  <tr
+                    onClick={() => toggleExpand(track.id)}
+                    className="track-row"
+                  >
+                    <td>{idx + 1}</td>
+                    <td>
+                      {track.artists} - {track.title}
+                    </td>
+                    <td>{track.custom}</td>
+                    <td>{track.mood}</td>
+                    <td>{renderStars(track.energy)}</td>
+                    <td>{track.genre}</td>
+                    <td>{track.year}</td>
+                    <td>{track.type}</td>
+                  </tr>
+                  {expandedTrack === track.id && (
+                    <tr className="expanded-row">
+                      <td colSpan={8}>
+                        <div className="expanded-content">
+                          <img src={track.imageUrl} alt={track.title} />
+                          <audio controls src={track.previewUrl} />
+                        </div>
+                      </td>
+                    </tr>
+                  )}
+                </Fragment>
               ))}
             </tbody>
           </table>
