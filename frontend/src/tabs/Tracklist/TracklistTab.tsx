@@ -1,6 +1,7 @@
 import { useState, useEffect, Fragment } from 'react'
 import './TracklistTab.css'
 import { tracklists, type Track } from './sampleData'
+import ResponsiveTable from '../../components/ResponsiveTable'
 
 const moodColors: Record<string, string> = {
   'mood 1': '#ff6b6b',
@@ -116,7 +117,7 @@ const TracklistTab = () => {
         {loading ? (
           <div className="loading">Cargando...</div>
         ) : (
-          <table className="fade-in">
+          <ResponsiveTable className="fade-in">
             <thead>
               <tr>
                 <th
@@ -209,7 +210,7 @@ const TracklistTab = () => {
                 </Fragment>
               ))}
             </tbody>
-          </table>
+          </ResponsiveTable>
         )}
       </section>
       <aside className={`filter-panel ${showFilters ? 'open' : ''}`}>
