@@ -1,6 +1,11 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, lazy, Suspense } from 'react'
 import TopBar, { type Tab } from './components/TopBar'
 import SettingsModal from './components/SettingsModal'
+
+const BeatportTab = lazy(() => import('./tabs/Beatport/BeatportTab'))
+const TracklistTab = lazy(() => import('./tabs/Tracklist/TracklistTab'))
+const BanTab = lazy(() => import('./tabs/Ban/BanTab'))
+const OtrosTab = lazy(() => import('./tabs/Otros/OtrosTab'))
 
 function App() {
   const [msg, setMsg] = useState('cargando...')
@@ -27,17 +32,12 @@ function App() {
         <p>
           Backend dice: <strong>{msg}</strong>
         </p>
-        {activeTab === 'BEATPORT' && (
-          <div className="text-boxes">
-            <input type="text" placeholder="Caja 1" />
-            <input type="text" placeholder="Caja 2" />
-          </div>
-        )}
-        {activeTab === '1001TRACKLIST' && (
-          <label>Pantalla 1001TRACKLIST</label>
-        )}
-        {activeTab === 'BAN/UNBAN' && <label>Pantalla BAN/UNBAN</label>}
-        {activeTab === 'OTROS' && <label>Pantalla OTROS</label>}
+        <Suspense fallback={<div>Cargando...</div>}>
+          {activeTab === 'BEATPORT' && <BeatportTab />}
+          {activeTab === '1001TRACKLIST' && <TracklistTab />}
+          {activeTab === 'BAN/UNBAN' && <BanTab />}
+          {activeTab === 'OTROS' && <OtrosTab />}
+        </Suspense>
       </div>
       {settingsOpen && (
         <SettingsModal
