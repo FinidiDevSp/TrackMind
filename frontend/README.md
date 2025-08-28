@@ -67,3 +67,18 @@ export default tseslint.config([
   },
 ])
 ```
+
+## Configurar el endpoint del backend
+
+Define la variable `VITE_API_BASE` para apuntar al backend en distintos entornos:
+
+```bash
+# .env (desarrollo)
+VITE_API_BASE=/api
+
+# .env.production (producción)
+VITE_API_BASE=https://api.ejemplo.com/api
+```
+
+Vite expone esta variable como `import.meta.env.VITE_API_BASE`. El archivo `frontend/src/config.ts` la lee para construir las URLs del backend.
+

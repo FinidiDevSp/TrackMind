@@ -1,4 +1,5 @@
 import { useEffect, useState, lazy, Suspense } from 'react'
+import { API_BASE } from './config'
 import TopBar, { type Tab } from './components/TopBar'
 import SettingsModal from './components/SettingsModal'
 
@@ -13,7 +14,7 @@ function App() {
   const [settingsOpen, setSettingsOpen] = useState(false)
 
   useEffect(() => {
-    fetch('/api/hello')
+    fetch(`${API_BASE}/hello`)
       .then(r => r.json())
       .then(d => setMsg(d.message))
       .catch(() => setMsg('Error conectando con el backend'))
