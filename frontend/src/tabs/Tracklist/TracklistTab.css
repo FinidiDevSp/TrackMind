@@ -1,0 +1,57 @@
+.tracklist-container {
+  display: flex;
+  gap: 12px;
+}
+
+.tracklists-panel {
+  width: 20%;
+  border-right: 1px solid #444;
+}
+
+.tracklists-panel ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.tracklists-panel li {
+  padding: 8px;
+  cursor: pointer;
+}
+
+.tracklists-panel li.active {
+  background-color: #333;
+  color: #fff;
+}
+
+.tracks-panel {
+  flex: 1;
+}
+
+.fade-in {
+  opacity: 0;
+  animation: fadeIn 0.5s forwards;
+}
+
+@keyframes fadeIn {
+  to {
+    opacity: 1;
+  }
+}
+
+.loading {
+  padding: 20px;
+  animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+  0% { opacity: 0.3; }
+  50% { opacity: 1; }
+  100% { opacity: 0.3; }
+}
+
+.filter-panel {
+  width: 20%;
+  border-left: 1px solid #444;
+  padding-left: 8px;
+}
