@@ -5,6 +5,8 @@ export interface Track {
   custom: string
   mood: string
   energy: number
+  tempo: number
+  duration: number
   genre: string
   year: number
   type: string
@@ -30,6 +32,8 @@ export const tracklists: Tracklist[] = [
         custom: 'Rework',
         mood: 'mood 1',
         energy: 5,
+        tempo: 128,
+        duration: 210,
         genre: 'Pumping House',
         year: 2023,
         type: 'Original Mix',
@@ -43,6 +47,8 @@ export const tracklists: Tracklist[] = [
         custom: 'Edit',
         mood: 'mood 2',
         energy: 4,
+        tempo: 132,
+        duration: 180,
         genre: 'Techno',
         year: 2024,
         type: 'Remix',
@@ -56,6 +62,8 @@ export const tracklists: Tracklist[] = [
         custom: 'Mashup',
         mood: 'mood 3',
         energy: 3,
+        tempo: 140,
+        duration: 200,
         genre: 'Trance',
         year: 2023,
         type: 'Bootleg',
@@ -75,6 +83,8 @@ export const tracklists: Tracklist[] = [
         custom: 'Extended',
         mood: 'mood 1',
         energy: 2,
+        tempo: 125,
+        duration: 240,
         genre: 'House',
         year: 2022,
         type: 'Original Mix',
@@ -88,6 +98,8 @@ export const tracklists: Tracklist[] = [
         custom: 'Rework',
         mood: 'mood 2',
         energy: 5,
+        tempo: 138,
+        duration: 190,
         genre: 'Trance',
         year: 2024,
         type: 'Bootleg',

@@ -23,8 +23,23 @@ const TracklistTab = () => {
   const [tracks, setTracks] = useState<Track[]>(tracklists[0]?.tracks ?? [])
   const [loading, setLoading] = useState(false)
   const [minEnergy, setMinEnergy] = useState(0)
+  const [genreFilter, setGenreFilter] = useState('')
+  const [minTempo, setMinTempo] = useState('')
+  const [maxTempo, setMaxTempo] = useState('')
+  const [minYear, setMinYear] = useState('')
+  const [maxYear, setMaxYear] = useState('')
+  const [minDuration, setMinDuration] = useState('')
+  const [maxDuration, setMaxDuration] = useState('')
   const [searchTerm, setSearchTerm] = useState('')
-  type SortKey = 'index' | 'theme' | 'custom' | 'mood' | 'energy' | 'genre' | 'year' | 'type'
+  type SortKey =
+    | 'index'
+    | 'theme'
+    | 'custom'
+    | 'mood'
+    | 'energy'
+    | 'genre'
+    | 'year'
+    | 'type'
   const [sortBy, setSortBy] = useState<SortKey>('index')
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc')
   const [expandedTrack, setExpandedTrack] = useState<string | null>(null)
@@ -46,7 +61,18 @@ const TracklistTab = () => {
     return () => clearTimeout(timer)
   }, [selectedId])
 
-  const filteredTracks = tracks.filter(t => t.energy >= minEnergy)
+  const genres = Array.from(new Set(tracks.map(t => t.genre)))
+  const filteredTracks = tracks.filter(t => {
+    if (t.energy < minEnergy) return false
+    if (genreFilter && t.genre !== genreFilter) return false
+    if (minTempo && t.tempo < Number(minTempo)) return false
+    if (maxTempo && t.tempo > Number(maxTempo)) return false
+    if (minYear && t.year < Number(minYear)) return false
+    if (maxYear && t.year > Number(maxYear)) return false
+    if (minDuration && t.duration < Number(minDuration)) return false
+    if (maxDuration && t.duration > Number(maxDuration)) return false
+    return true
+  })
   const sortedTracks = (() => {
     const arr = [...filteredTracks]
     if (sortBy === 'index') {
@@ -224,6 +250,65 @@ const TracklistTab = () => {
             <option value={4}>4+</option>
             <option value={5}>5</option>
           </select>
+        </label>
+        <label>
+          Género
+          <select value={genreFilter} onChange={e => setGenreFilter(e.target.value)}>
+            <option value="">Todos</option>
+            {genres.map(g => (
+              <option key={g} value={g}>
+                {g}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label>
+          Tempo mínimo
+          <input
+            type="number"
+            value={minTempo}
+            onChange={e => setMinTempo(e.target.value)}
+          />
+        </label>
+        <label>
+          Tempo máximo
+          <input
+            type="number"
+            value={maxTempo}
+            onChange={e => setMaxTempo(e.target.value)}
+          />
+        </label>
+        <label>
+          Año mínimo
+          <input
+            type="number"
+            value={minYear}
+            onChange={e => setMinYear(e.target.value)}
+          />
+        </label>
+        <label>
+          Año máximo
+          <input
+            type="number"
+            value={maxYear}
+            onChange={e => setMaxYear(e.target.value)}
+          />
+        </label>
+        <label>
+          Duración mínima (s)
+          <input
+            type="number"
+            value={minDuration}
+            onChange={e => setMinDuration(e.target.value)}
+          />
+        </label>
+        <label>
+          Duración máxima (s)
+          <input
+            type="number"
+            value={maxDuration}
+            onChange={e => setMaxDuration(e.target.value)}
+          />
         </label>
       </aside>
     </div>
