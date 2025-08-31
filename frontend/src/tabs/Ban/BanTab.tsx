@@ -1,5 +1,6 @@
-import { Fragment, useEffect, useState } from 'react'
+import { Fragment, useState } from 'react'
 import { FaTrash, FaFolder, FaFolderOpen } from 'react-icons/fa'
+import Toast from '../../components/Toast'
 import './BanTab.css'
 
 interface Item {
@@ -50,7 +51,7 @@ const BanTab = () => {
   ])
 
   const [searchTerm, setSearchTerm] = useState('')
-  const [showAlert, setShowAlert] = useState(false)
+  const [toast, setToast] = useState('')
   const [lastRemoved, setLastRemoved] = useState<
     { item: Item; from: 'ban' | 'unban' } | null
   >(null)
@@ -82,6 +83,7 @@ const BanTab = () => {
     e: React.ChangeEvent<HTMLInputElement>,
     setter: React.Dispatch<React.SetStateAction<string>>,
     errorSetter: React.Dispatch<React.SetStateAction<string>>,
+    type: 'BAN' | 'UNBAN',
   ) => {
     const files = e.target.files
     if (files && files.length > 0) {
@@ -89,6 +91,7 @@ const BanTab = () => {
       const path = file.path ?? file.webkitRelativePath?.split('/')[0] ?? ''
       setter(path)
       await checkPath(path, errorSetter)
+      setToast(`Carpeta ${type} seleccionada`)
     }
   }
 
@@ -97,6 +100,7 @@ const BanTab = () => {
     if (item && window.confirm(`¿Eliminar ${item.name}?`)) {
       setBanList(prev => prev.filter(i => i.id !== id))
       setLastRemoved({ item, from: 'ban' })
+      setToast(`${item.name} eliminado de BAN`)
     }
   }
 
@@ -105,6 +109,7 @@ const BanTab = () => {
     if (item && window.confirm(`¿Eliminar ${item.name}?`)) {
       setUnbanList(prev => prev.filter(i => i.id !== id))
       setLastRemoved({ item, from: 'unban' })
+      setToast(`${item.name} eliminado de UNBAN`)
     }
   }
 
@@ -112,17 +117,13 @@ const BanTab = () => {
     if (!lastRemoved) return
     if (lastRemoved.from === 'ban') {
       setBanList(prev => [...prev, lastRemoved.item])
+      setToast(`${lastRemoved.item.name} agregado a BAN`)
     } else {
       setUnbanList(prev => [...prev, lastRemoved.item])
+      setToast(`${lastRemoved.item.name} agregado a UNBAN`)
     }
     setLastRemoved(null)
   }
-
-  useEffect(() => {
-    setShowAlert(true)
-    const timer = setTimeout(() => setShowAlert(false), 3000)
-    return () => clearTimeout(timer)
-  }, [])
 
   const groupedBan = groupByLetter(banList)
   const groupedUnban = groupByLetter(unbanList)
@@ -163,7 +164,7 @@ const BanTab = () => {
               id="ban-folder"
               type="file"
               style={{ display: 'none' }}
-              onChange={e => handleFolderChange(e, setBanPath, setBanError)}
+              onChange={e => handleFolderChange(e, setBanPath, setBanError, 'BAN')}
               // eslint-disable-next-line @typescript-eslint/ban-ts-comment
               // @ts-ignore: permitir selección de carpetas
               webkitdirectory=""
@@ -221,7 +222,7 @@ const BanTab = () => {
             id="unban-folder"
             type="file"
             style={{ display: 'none' }}
-            onChange={e => handleFolderChange(e, setUnbanPath, setUnbanError)}
+            onChange={e => handleFolderChange(e, setUnbanPath, setUnbanError, 'UNBAN')}
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
             // @ts-ignore: permitir selección de carpetas
             webkitdirectory=""
@@ -262,11 +263,7 @@ const BanTab = () => {
       </section>
       </div>
       <footer className="ban-footer">Información de la pantalla BAN/UNBAN</footer>
-      {showAlert && (
-        <div className="alert-box">
-          Cargados {banList.length} BAN y {unbanList.length} UNBAN
-        </div>
-      )}
+      {toast && <Toast message={toast} onClose={() => setToast('')} />}
       {lastRemoved && (
         <button type="button" className="undo-button" onClick={undoRemove}>
           Deshacer
