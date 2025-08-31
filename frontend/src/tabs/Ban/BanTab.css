@@ -36,7 +36,7 @@
   color: var(--text-color);
 }
 
-.path-input button {
+.path-input label {
   border: 1px solid var(--muted-color);
   background-color: var(--surface-color);
   color: var(--text-color);
@@ -48,9 +48,15 @@
   cursor: pointer;
 }
 
-.path-input button:hover {
+.path-input label:hover {
   background-color: var(--muted-color);
   color: var(--surface-color);
+}
+
+.error-message {
+  color: var(--accent-color);
+  font-size: 0.875rem;
+  margin-top: 4px;
 }
 
 .item-list {
