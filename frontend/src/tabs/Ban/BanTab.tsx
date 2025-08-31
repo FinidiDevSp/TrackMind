@@ -1,5 +1,5 @@
 import { Fragment, useEffect, useRef, useState } from 'react'
-import { FaTrash } from 'react-icons/fa'
+import { FaTrash, FaFolder, FaFolderOpen } from 'react-icons/fa'
 import './BanTab.css'
 
 interface Item {
@@ -86,6 +86,7 @@ const BanTab = () => {
       <div className="ban-container">
         <section className="ban-section">
           <div className="path-input">
+            <FaFolder className="input-icon" />
             <input
               type="text"
               value={banPath}
@@ -101,8 +102,12 @@ const BanTab = () => {
               // @ts-ignore: permitir selección de carpetas
               webkitdirectory=""
             />
-            <button type="button" onClick={() => banInputRef.current?.click()}>
-              ...
+            <button
+              type="button"
+              aria-label="Seleccionar carpeta BAN"
+              onClick={() => banInputRef.current?.click()}
+            >
+              <FaFolderOpen />
             </button>
           </div>
         <ul className="item-list">
@@ -131,6 +136,7 @@ const BanTab = () => {
 
       <section className="ban-section">
         <div className="path-input">
+          <FaFolder className="input-icon" />
           <input
             type="text"
             value={unbanPath}
@@ -146,8 +152,12 @@ const BanTab = () => {
             // @ts-ignore: permitir selección de carpetas
             webkitdirectory=""
           />
-          <button type="button" onClick={() => unbanInputRef.current?.click()}>
-            ...
+          <button
+            type="button"
+            aria-label="Seleccionar carpeta UNBAN"
+            onClick={() => unbanInputRef.current?.click()}
+          >
+            <FaFolderOpen />
           </button>
         </div>
         <ul className="item-list">
