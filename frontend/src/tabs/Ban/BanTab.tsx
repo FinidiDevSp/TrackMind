@@ -1,4 +1,5 @@
 import { useRef, useState } from 'react'
+import './BanTab.css'
 
 interface Item {
   id: number
@@ -40,15 +41,14 @@ const BanTab = () => {
   }
 
   return (
-    <div>
-      <section style={{ marginBottom: 24 }}>
-        <div style={{ display: 'flex', gap: 8, marginBottom: 8 }}>
+    <div className="ban-container">
+      <section className="ban-section">
+        <div className="path-input">
           <input
             type="text"
             value={banPath}
             readOnly
             placeholder="Ruta BAN"
-            style={{ flex: 1 }}
           />
           <input
             type="file"
@@ -63,10 +63,10 @@ const BanTab = () => {
             ...
           </button>
         </div>
-        <ul>
+        <ul className="item-list">
           {banList.map(item => (
             <li key={item.id}>
-              {item.name}{' '}
+              <span>{item.name}</span>
               <button type="button" onClick={() => removeBan(item.id)}>
                 Eliminar
               </button>
@@ -75,14 +75,13 @@ const BanTab = () => {
         </ul>
       </section>
 
-      <section>
-        <div style={{ display: 'flex', gap: 8, marginBottom: 8 }}>
+      <section className="ban-section">
+        <div className="path-input">
           <input
             type="text"
             value={unbanPath}
             readOnly
             placeholder="Ruta UNBAN"
-            style={{ flex: 1 }}
           />
           <input
             type="file"
@@ -97,10 +96,10 @@ const BanTab = () => {
             ...
           </button>
         </div>
-        <ul>
+        <ul className="item-list">
           {unbanList.map(item => (
             <li key={item.id}>
-              {item.name}{' '}
+              <span>{item.name}</span>
               <button type="button" onClick={() => removeUnban(item.id)}>
                 Eliminar
               </button>
