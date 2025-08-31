@@ -1,4 +1,4 @@
-import { Fragment, useEffect, useRef, useState } from 'react'
+import { Fragment, useEffect, useState } from 'react'
 import { FaTrash, FaFolder, FaFolderOpen } from 'react-icons/fa'
 import './BanTab.css'
 
@@ -18,6 +18,8 @@ const groupByLetter = (items: Item[]) =>
 const BanTab = () => {
   const [banPath, setBanPath] = useState('')
   const [unbanPath, setUnbanPath] = useState('')
+  const [banError, setBanError] = useState('')
+  const [unbanError, setUnbanError] = useState('')
   const [banList, setBanList] = useState<Item[]>([
     { id: 1, name: 'Alpha Song' },
     { id: 2, name: 'Amanecer' },
@@ -53,18 +55,40 @@ const BanTab = () => {
     { item: Item; from: 'ban' | 'unban' } | null
   >(null)
 
-  const banInputRef = useRef<HTMLInputElement>(null)
-  const unbanInputRef = useRef<HTMLInputElement>(null)
+  const validatePath = async (path: string) => {
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const fs = (window as any).require?.('fs')
+      if (fs) {
+        await fs.promises.access(path)
+        const stat = await fs.promises.lstat(path)
+        return stat.isDirectory()
+      }
+    } catch {
+      return false
+    }
+    return path.trim().length > 0
+  }
 
-  const handleFolderChange = (
+  const checkPath = async (
+    path: string,
+    errorSetter: React.Dispatch<React.SetStateAction<string>>,
+  ) => {
+    const valid = await validatePath(path)
+    errorSetter(valid ? '' : 'Ruta inválida o inaccesible')
+  }
+
+  const handleFolderChange = async (
     e: React.ChangeEvent<HTMLInputElement>,
     setter: React.Dispatch<React.SetStateAction<string>>,
+    errorSetter: React.Dispatch<React.SetStateAction<string>>,
   ) => {
     const files = e.target.files
     if (files && files.length > 0) {
       const file = files[0] as File & { path?: string; webkitRelativePath?: string }
       const path = file.path ?? file.webkitRelativePath?.split('/')[0] ?? ''
       setter(path)
+      await checkPath(path, errorSetter)
     }
   }
 
@@ -127,26 +151,28 @@ const BanTab = () => {
             <input
               type="text"
               value={banPath}
-              readOnly
+              readOnly={false}
+              onChange={e => {
+                setBanPath(e.target.value)
+                setBanError('')
+              }}
+              onBlur={() => checkPath(banPath, setBanError)}
               placeholder="Ruta BAN"
             />
             <input
+              id="ban-folder"
               type="file"
-              ref={banInputRef}
               style={{ display: 'none' }}
-              onChange={e => handleFolderChange(e, setBanPath)}
+              onChange={e => handleFolderChange(e, setBanPath, setBanError)}
               // eslint-disable-next-line @typescript-eslint/ban-ts-comment
               // @ts-ignore: permitir selección de carpetas
               webkitdirectory=""
             />
-            <button
-              type="button"
-              aria-label="Seleccionar carpeta BAN"
-              onClick={() => banInputRef.current?.click()}
-            >
+            <label htmlFor="ban-folder" aria-label="Seleccionar carpeta BAN" tabIndex={0}>
               <FaFolderOpen />
-            </button>
+            </label>
           </div>
+          {banError && <span className="error-message">{banError}</span>}
         <input
           type="search"
           value={searchTerm}
@@ -183,26 +209,28 @@ const BanTab = () => {
           <input
             type="text"
             value={unbanPath}
-            readOnly
+            readOnly={false}
+            onChange={e => {
+              setUnbanPath(e.target.value)
+              setUnbanError('')
+            }}
+            onBlur={() => checkPath(unbanPath, setUnbanError)}
             placeholder="Ruta UNBAN"
           />
           <input
+            id="unban-folder"
             type="file"
-            ref={unbanInputRef}
             style={{ display: 'none' }}
-            onChange={e => handleFolderChange(e, setUnbanPath)}
+            onChange={e => handleFolderChange(e, setUnbanPath, setUnbanError)}
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
             // @ts-ignore: permitir selección de carpetas
             webkitdirectory=""
           />
-          <button
-            type="button"
-            aria-label="Seleccionar carpeta UNBAN"
-            onClick={() => unbanInputRef.current?.click()}
-          >
+          <label htmlFor="unban-folder" aria-label="Seleccionar carpeta UNBAN" tabIndex={0}>
             <FaFolderOpen />
-          </button>
+          </label>
         </div>
+        {unbanError && <span className="error-message">{unbanError}</span>}
         <input
           type="search"
           value={searchTerm}
