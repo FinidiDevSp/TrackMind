@@ -47,6 +47,7 @@ const BanTab = () => {
     { id: 24, name: 'Flota' },
   ])
 
+  const [searchTerm, setSearchTerm] = useState('')
   const [showAlert, setShowAlert] = useState(false)
 
   const banInputRef = useRef<HTMLInputElement>(null)
@@ -81,6 +82,21 @@ const BanTab = () => {
   const groupedBan = groupByLetter(banList)
   const groupedUnban = groupByLetter(unbanList)
 
+  const filterGroups = (groups: Record<string, Item[]>) =>
+    Object.entries(groups).reduce<Record<string, Item[]>>(
+      (acc, [letter, items]) => {
+        const filteredItems = items.filter(item =>
+          item.name.toLowerCase().includes(searchTerm.toLowerCase()),
+        )
+        if (filteredItems.length) acc[letter] = filteredItems
+        return acc
+      },
+      {},
+    )
+
+  const filteredGroupedBan = filterGroups(groupedBan)
+  const filteredGroupedUnban = filterGroups(groupedUnban)
+
   return (
     <>
       <div className="ban-container">
@@ -110,8 +126,14 @@ const BanTab = () => {
               <FaFolderOpen />
             </button>
           </div>
+        <input
+          type="search"
+          value={searchTerm}
+          onChange={e => setSearchTerm(e.target.value)}
+          placeholder="Buscar..."
+        />
         <ul className="item-list">
-          {Object.entries(groupedBan)
+          {Object.entries(filteredGroupedBan)
             .sort(([a], [b]) => a.localeCompare(b))
             .map(([letter, items]) => (
               <Fragment key={letter}>
@@ -160,8 +182,14 @@ const BanTab = () => {
             <FaFolderOpen />
           </button>
         </div>
+        <input
+          type="search"
+          value={searchTerm}
+          onChange={e => setSearchTerm(e.target.value)}
+          placeholder="Buscar..."
+        />
         <ul className="item-list">
-          {Object.entries(groupedUnban)
+          {Object.entries(filteredGroupedUnban)
             .sort(([a], [b]) => a.localeCompare(b))
             .map(([letter, items]) => (
               <Fragment key={letter}>
