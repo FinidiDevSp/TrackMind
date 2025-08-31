@@ -68,7 +68,7 @@
   background-color: var(--surface-color);
   flex: 1;
   overflow-y: auto;
-  max-height: 300px;
+  max-height: 60vh;
 }
 
 .letter-header {
