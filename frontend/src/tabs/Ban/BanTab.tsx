@@ -49,6 +49,9 @@ const BanTab = () => {
 
   const [searchTerm, setSearchTerm] = useState('')
   const [showAlert, setShowAlert] = useState(false)
+  const [lastRemoved, setLastRemoved] = useState<
+    { item: Item; from: 'ban' | 'unban' } | null
+  >(null)
 
   const banInputRef = useRef<HTMLInputElement>(null)
   const unbanInputRef = useRef<HTMLInputElement>(null)
@@ -66,11 +69,29 @@ const BanTab = () => {
   }
 
   const removeBan = (id: number) => {
-    setBanList(prev => prev.filter(item => item.id !== id))
+    const item = banList.find(i => i.id === id)
+    if (item && window.confirm(`¿Eliminar ${item.name}?`)) {
+      setBanList(prev => prev.filter(i => i.id !== id))
+      setLastRemoved({ item, from: 'ban' })
+    }
   }
 
   const removeUnban = (id: number) => {
-    setUnbanList(prev => prev.filter(item => item.id !== id))
+    const item = unbanList.find(i => i.id === id)
+    if (item && window.confirm(`¿Eliminar ${item.name}?`)) {
+      setUnbanList(prev => prev.filter(i => i.id !== id))
+      setLastRemoved({ item, from: 'unban' })
+    }
+  }
+
+  const undoRemove = () => {
+    if (!lastRemoved) return
+    if (lastRemoved.from === 'ban') {
+      setBanList(prev => [...prev, lastRemoved.item])
+    } else {
+      setUnbanList(prev => [...prev, lastRemoved.item])
+    }
+    setLastRemoved(null)
   }
 
   useEffect(() => {
@@ -217,6 +238,11 @@ const BanTab = () => {
         <div className="alert-box">
           Cargados {banList.length} BAN y {unbanList.length} UNBAN
         </div>
+      )}
+      {lastRemoved && (
+        <button type="button" className="undo-button" onClick={undoRemove}>
+          Deshacer
+        </button>
       )}
     </>
   )
