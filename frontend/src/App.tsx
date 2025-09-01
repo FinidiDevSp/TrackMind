@@ -2,6 +2,7 @@ import { useEffect, useState, lazy, Suspense } from 'react'
 import { useMainConfig } from './MainConfigContext'
 import Sidebar, { type Tab } from './components/Sidebar'
 import SettingsModal from './components/SettingsModal'
+import { apiFetch } from './utils/api'
 
 const BeatportTab = lazy(() => import('./tabs/Beatport/BeatportTab'))
 const TracklistTab = lazy(() => import('./tabs/Tracklist/TracklistTab'))
@@ -21,8 +22,24 @@ function App() {
     return () => clearInterval(id)
   }, [])
 
-  const handleStart = () => {
-    alert(config.banScreenEnabled ? 'OK' : 'NO OK')
+  const handleStart = async () => {
+    if (!config.banScreenEnabled) {
+      return
+    }
+    try {
+      const res = await apiFetch('/tracklists/start', {
+        method: 'POST',
+        body: JSON.stringify({ ban_unban_active: true }),
+      })
+      const processed = res.processed || { ban: [], unban: [] }
+      if (processed.ban.length === 0 && processed.unban.length === 0) {
+        alert('No hay carpetas para procesar')
+      } else {
+        alert('Proceso BAN/UNBAN completado')
+      }
+    } catch {
+      alert('Error al iniciar el proceso')
+    }
   }
 
   return (
