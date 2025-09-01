@@ -55,6 +55,10 @@ const BanTab = () => {
   const [lastRemoved, setLastRemoved] = useState<
     { item: Item; from: 'ban' | 'unban' } | null
   >(null)
+  const [draggedItem, setDraggedItem] = useState<
+    { item: Item; from: 'ban' | 'unban' } | null
+  >(null)
+  const [dragOver, setDragOver] = useState<'ban' | 'unban' | null>(null)
 
   const validatePath = async (path: string) => {
     try {
@@ -125,6 +129,21 @@ const BanTab = () => {
     setLastRemoved(null)
   }
 
+  const handleDrop = (target: 'ban' | 'unban') => {
+    if (!draggedItem || draggedItem.from === target) return
+    if (target === 'ban') {
+      setBanList(prev => [...prev, draggedItem.item])
+      setUnbanList(prev => prev.filter(i => i.id !== draggedItem.item.id))
+      setToast(`${draggedItem.item.name} movido a BAN`)
+    } else {
+      setUnbanList(prev => [...prev, draggedItem.item])
+      setBanList(prev => prev.filter(i => i.id !== draggedItem.item.id))
+      setToast(`${draggedItem.item.name} movido a UNBAN`)
+    }
+    setDraggedItem(null)
+    setDragOver(null)
+  }
+
   const groupedBan = groupByLetter(banList)
   const groupedUnban = groupByLetter(unbanList)
 
@@ -180,14 +199,26 @@ const BanTab = () => {
           onChange={e => setSearchTerm(e.target.value)}
           placeholder="Buscar..."
         />
-        <ul className="item-list">
+        <ul
+          className={`item-list ${dragOver === 'ban' ? 'drag-over' : ''}`}
+          onDragOver={e => e.preventDefault()}
+          onDragEnter={() => setDragOver('ban')}
+          onDragLeave={() => setDragOver(null)}
+          onDrop={() => handleDrop('ban')}
+        >
           {Object.entries(filteredGroupedBan)
             .sort(([a], [b]) => a.localeCompare(b))
             .map(([letter, items]) => (
               <Fragment key={letter}>
                 <li className="letter-header">{letter}</li>
                 {items.map(item => (
-                  <li key={item.id} className="item-row">
+                  <li
+                    key={item.id}
+                    className="item-row"
+                    draggable
+                    onDragStart={() => setDraggedItem({ item, from: 'ban' })}
+                    onDragEnd={() => setDraggedItem(null)}
+                  >
                     <span>{item.name}</span>
                     <button
                       type="button"
@@ -238,14 +269,26 @@ const BanTab = () => {
           onChange={e => setSearchTerm(e.target.value)}
           placeholder="Buscar..."
         />
-        <ul className="item-list">
+        <ul
+          className={`item-list ${dragOver === 'unban' ? 'drag-over' : ''}`}
+          onDragOver={e => e.preventDefault()}
+          onDragEnter={() => setDragOver('unban')}
+          onDragLeave={() => setDragOver(null)}
+          onDrop={() => handleDrop('unban')}
+        >
           {Object.entries(filteredGroupedUnban)
             .sort(([a], [b]) => a.localeCompare(b))
             .map(([letter, items]) => (
               <Fragment key={letter}>
                 <li className="letter-header">{letter}</li>
                 {items.map(item => (
-                  <li key={item.id} className="item-row">
+                  <li
+                    key={item.id}
+                    className="item-row"
+                    draggable
+                    onDragStart={() => setDraggedItem({ item, from: 'unban' })}
+                    onDragEnd={() => setDraggedItem(null)}
+                  >
                     <span>{item.name}</span>
                     <button
                       type="button"
