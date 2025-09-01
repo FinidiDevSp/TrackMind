@@ -18,8 +18,6 @@ const groupByLetter = (items: Item[]) =>
 const BanTab = () => {
   const [banPath, setBanPath] = useState('')
   const [unbanPath, setUnbanPath] = useState('')
-  const [banError, setBanError] = useState('')
-  const [unbanError, setUnbanError] = useState('')
   const [banList, setBanList] = useState<Item[]>([
     { id: 1, name: 'Alpha Song' },
     { id: 2, name: 'Amanecer' },
@@ -57,8 +55,10 @@ const BanTab = () => {
   const [lastRemoved, setLastRemoved] = useState<
     { item: Item; from: 'ban' | 'unban' } | null
   >(null)
-  const [draggedItem, setDraggedItem] = useState<
-    { item: Item; from: 'ban' | 'unban' } | null
+  const [dragged, setDragged] = useState<
+    | { type: 'item'; item: Item; from: 'ban' | 'unban' }
+    | { type: 'group'; letter: string; from: 'ban' | 'unban' }
+    | null
   >(null)
   const [dragOver, setDragOver] = useState<'ban' | 'unban' | null>(null)
 
@@ -83,31 +83,41 @@ const BanTab = () => {
     return path.trim().length > 0
   }
 
-  const checkPath = async (
-    path: string,
-    errorSetter: React.Dispatch<React.SetStateAction<string>>,
-  ) => {
+  const checkPath = async (path: string, type: 'BAN' | 'UNBAN') => {
     const valid = await validatePath(path)
-    errorSetter(valid ? '' : 'Ruta inválida o inaccesible')
+    if (!valid) {
+      setAlert({
+        type: 'danger',
+        message: `Ruta ${type} inválida o inaccesible`,
+      })
+    }
+    return valid
   }
 
   const handleFolderChange = async (
     e: React.ChangeEvent<HTMLInputElement>,
     setter: React.Dispatch<React.SetStateAction<string>>,
-    errorSetter: React.Dispatch<React.SetStateAction<string>>,
     type: 'BAN' | 'UNBAN',
   ) => {
     const files = e.target.files
     if (files && files.length > 0) {
       const file = files[0] as File & { path?: string; webkitRelativePath?: string }
-      const path =
-        file.path ||
-        (file.webkitRelativePath
-          ? file.webkitRelativePath.split('/')[0]
-          : file.name)
-      setter(path)
-      await checkPath(path, errorSetter)
-      setAlert({ type: 'success', message: `Carpeta ${type} seleccionada` })
+      let folderPath = ''
+      if (file.path) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const pathModule = (window as any).require?.('path')
+        folderPath = pathModule
+          ? pathModule.dirname(file.path)
+          : file.path.replace(/[/\\][^/\\]*$/, '')
+      } else if (file.webkitRelativePath) {
+        folderPath = file.webkitRelativePath.split('/')[0]
+      } else {
+        folderPath = file.name
+      }
+      setter(folderPath)
+      const valid = await checkPath(folderPath, type)
+      if (valid)
+        setAlert({ type: 'success', message: `Carpeta ${type} seleccionada` })
       e.target.value = ''
     }
   }
@@ -149,23 +159,49 @@ const BanTab = () => {
   }
 
   const handleDrop = (target: 'ban' | 'unban') => {
-    if (!draggedItem || draggedItem.from === target) return
-    if (target === 'ban') {
-      setBanList(prev => [...prev, draggedItem.item])
-      setUnbanList(prev => prev.filter(i => i.id !== draggedItem.item.id))
-      setAlert({
-        type: 'success',
-        message: `${draggedItem.item.name} movido a BAN`,
-      })
+    if (!dragged || dragged.from === target) return
+    if (dragged.type === 'item') {
+      if (target === 'ban') {
+        setBanList(prev => [...prev, dragged.item])
+        setUnbanList(prev => prev.filter(i => i.id !== dragged.item.id))
+        setAlert({
+          type: 'success',
+          message: `${dragged.item.name} movido a BAN`,
+        })
+      } else {
+        setUnbanList(prev => [...prev, dragged.item])
+        setBanList(prev => prev.filter(i => i.id !== dragged.item.id))
+        setAlert({
+          type: 'success',
+          message: `${dragged.item.name} movido a UNBAN`,
+        })
+      }
     } else {
-      setUnbanList(prev => [...prev, draggedItem.item])
-      setBanList(prev => prev.filter(i => i.id !== draggedItem.item.id))
-      setAlert({
-        type: 'success',
-        message: `${draggedItem.item.name} movido a UNBAN`,
-      })
+      const sourceList = dragged.from === 'ban' ? banList : unbanList
+      const itemsToMove = sourceList.filter(i =>
+        i.name.toUpperCase().startsWith(dragged.letter),
+      )
+      if (target === 'ban') {
+        setBanList(prev => [...prev, ...itemsToMove])
+        setUnbanList(prev =>
+          prev.filter(i => !i.name.toUpperCase().startsWith(dragged.letter)),
+        )
+        setAlert({
+          type: 'success',
+          message: `Elementos '${dragged.letter}' movidos a BAN`,
+        })
+      } else {
+        setUnbanList(prev => [...prev, ...itemsToMove])
+        setBanList(prev =>
+          prev.filter(i => !i.name.toUpperCase().startsWith(dragged.letter)),
+        )
+        setAlert({
+          type: 'success',
+          message: `Elementos '${dragged.letter}' movidos a UNBAN`,
+        })
+      }
     }
-    setDraggedItem(null)
+    setDragged(null)
     setDragOver(null)
   }
 
@@ -189,7 +225,7 @@ const BanTab = () => {
 
   return (
     <>
-      <div className="container my-3">
+      <div className="my-3" style={{ margin: '0 10%' }}>
         <div className="row g-3">
           <section className="col-md-6 d-flex flex-column">
             <div className="input-group mb-2">
@@ -200,18 +236,15 @@ const BanTab = () => {
                 type="text"
                 className="form-control"
                 value={banPath}
-                onChange={e => {
-                  setBanPath(e.target.value)
-                  setBanError('')
-                }}
-                onBlur={() => checkPath(banPath, setBanError)}
+                onChange={e => setBanPath(e.target.value)}
+                onBlur={() => checkPath(banPath, 'BAN')}
                 placeholder="Ruta BAN"
               />
               <input
                 id="ban-folder"
                 type="file"
                 style={{ display: 'none' }}
-                onChange={e => handleFolderChange(e, setBanPath, setBanError, 'BAN')}
+                onChange={e => handleFolderChange(e, setBanPath, 'BAN')}
                 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
                 // @ts-ignore: permitir selección de carpetas
                 webkitdirectory=""
@@ -225,7 +258,6 @@ const BanTab = () => {
                 <FaFolderOpen />
               </label>
             </div>
-            {banError && <div className="text-danger small mb-2">{banError}</div>}
             <div className="input-group mb-2">
               <span className="input-group-text">
                 <FaSearch />
@@ -249,14 +281,27 @@ const BanTab = () => {
                 .sort(([a], [b]) => a.localeCompare(b))
                 .map(([letter, items]) => (
                   <Fragment key={letter}>
-                    <li className="list-group-item letter-header">{letter}</li>
+                    <li
+                      className="list-group-item letter-header"
+                      draggable
+                      onDragStart={() => setDragged({
+                        type: 'group',
+                        letter,
+                        from: 'ban',
+                      })}
+                      onDragEnd={() => setDragged(null)}
+                    >
+                      {letter}
+                    </li>
                     {items.map(item => (
                       <li
                         key={item.id}
                         className="list-group-item d-flex justify-content-between align-items-center"
                         draggable
-                        onDragStart={() => setDraggedItem({ item, from: 'ban' })}
-                        onDragEnd={() => setDraggedItem(null)}
+                        onDragStart={() =>
+                          setDragged({ type: 'item', item, from: 'ban' })
+                        }
+                        onDragEnd={() => setDragged(null)}
                       >
                         <span>{item.name}</span>
                         <button
@@ -272,6 +317,9 @@ const BanTab = () => {
                   </Fragment>
                 ))}
             </ul>
+            <div className="mt-2 text-end">
+              <span className="badge bg-secondary">{banList.length} elementos</span>
+            </div>
           </section>
 
           <section className="col-md-6 d-flex flex-column">
@@ -283,18 +331,15 @@ const BanTab = () => {
                 type="text"
                 className="form-control"
                 value={unbanPath}
-                onChange={e => {
-                  setUnbanPath(e.target.value)
-                  setUnbanError('')
-                }}
-                onBlur={() => checkPath(unbanPath, setUnbanError)}
+                onChange={e => setUnbanPath(e.target.value)}
+                onBlur={() => checkPath(unbanPath, 'UNBAN')}
                 placeholder="Ruta UNBAN"
               />
               <input
                 id="unban-folder"
                 type="file"
                 style={{ display: 'none' }}
-                onChange={e => handleFolderChange(e, setUnbanPath, setUnbanError, 'UNBAN')}
+                onChange={e => handleFolderChange(e, setUnbanPath, 'UNBAN')}
                 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
                 // @ts-ignore: permitir selección de carpetas
                 webkitdirectory=""
@@ -308,7 +353,6 @@ const BanTab = () => {
                 <FaFolderOpen />
               </label>
             </div>
-            {unbanError && <div className="text-danger small mb-2">{unbanError}</div>}
             <div className="input-group mb-2">
               <span className="input-group-text">
                 <FaSearch />
@@ -332,14 +376,25 @@ const BanTab = () => {
                 .sort(([a], [b]) => a.localeCompare(b))
                 .map(([letter, items]) => (
                   <Fragment key={letter}>
-                    <li className="list-group-item letter-header">{letter}</li>
+                    <li
+                      className="list-group-item letter-header"
+                      draggable
+                      onDragStart={() =>
+                        setDragged({ type: 'group', letter, from: 'unban' })
+                      }
+                      onDragEnd={() => setDragged(null)}
+                    >
+                      {letter}
+                    </li>
                     {items.map(item => (
                       <li
                         key={item.id}
                         className="list-group-item d-flex justify-content-between align-items-center"
                         draggable
-                        onDragStart={() => setDraggedItem({ item, from: 'unban' })}
-                        onDragEnd={() => setDraggedItem(null)}
+                        onDragStart={() =>
+                          setDragged({ type: 'item', item, from: 'unban' })
+                        }
+                        onDragEnd={() => setDragged(null)}
                       >
                         <span>{item.name}</span>
                         <button
@@ -355,6 +410,9 @@ const BanTab = () => {
                   </Fragment>
                 ))}
             </ul>
+            <div className="mt-2 text-end">
+              <span className="badge bg-secondary">{unbanList.length} elementos</span>
+            </div>
           </section>
         </div>
       </div>
