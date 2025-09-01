@@ -66,17 +66,14 @@ const BanTab = () => {
 
   const validatePath = async (path: string) => {
     try {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const fs = (window as any).require?.('fs')
-      if (fs) {
-        await fs.promises.access(path)
-        const stat = await fs.promises.lstat(path)
-        return stat.isDirectory()
-      }
+      const res = await apiFetch('/validate-path', {
+        method: 'POST',
+        body: JSON.stringify({ path }),
+      })
+      return res.valid
     } catch {
       return false
     }
-    return path.trim().length > 0
   }
 
   const checkPath = async (path: string, type: 'BAN' | 'UNBAN') => {

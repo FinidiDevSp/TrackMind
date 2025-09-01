@@ -13,7 +13,7 @@ from pathlib import Path
 from typing import List
 
 import json
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 
 # ---------------------------------------------------------------------------
@@ -76,6 +76,19 @@ class Paths(BaseModel):
     unban_path: str
 
 
+class PathCheck(BaseModel):
+    path: str
+
+
+def is_valid_directory(path_str: str) -> bool:
+    """Return True if the given path exists and is a directory."""
+    try:
+        path = Path(path_str)
+        return path.exists() and path.is_dir()
+    except OSError:
+        return False
+
+
 # ---------------------------------------------------------------------------
 # API endpoints
 # ---------------------------------------------------------------------------
@@ -123,6 +136,12 @@ async def delete_banned(name: str) -> dict:
     return {"status": "deleted", "table": "banned", "name": name}
 
 
+@app.post("/api/validate-path")
+async def validate_path(item: PathCheck) -> dict:
+    """Validate that the provided path exists and is a directory."""
+    return {"valid": is_valid_directory(item.path)}
+
+
 # ---------------------------------------------------------------------------
 # Configuration file endpoints
 # ---------------------------------------------------------------------------
@@ -149,6 +168,9 @@ async def get_paths() -> dict:
 @app.post("/api/paths")
 async def save_paths(paths: Paths) -> dict:
     """Persist BAN and UNBAN paths to the JSON configuration file."""
+    for p in (paths.ban_path, paths.unban_path):
+        if p and not is_valid_directory(p):
+            raise HTTPException(status_code=400, detail=f"Invalid directory: {p}")
     CONFIG_PATH.parent.mkdir(parents=True, exist_ok=True)
     with CONFIG_PATH.open("w", encoding="utf-8") as fh:
         json.dump(paths.model_dump(), fh, ensure_ascii=False, indent=2)
