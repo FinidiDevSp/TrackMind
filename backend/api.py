@@ -27,7 +27,7 @@ app = FastAPI(title="TrackMind Ban API")
 
 
 @app.get("/api/hello")
-async def hello() -> dict:
+async def hello() -> dict[str, str]:
     """Simple endpoint used by the frontend to verify connectivity."""
     return {"message": "OK"}
 
@@ -81,8 +81,10 @@ class Paths(BaseModel):
 # ---------------------------------------------------------------------------
 
 
+from typing import Dict
+
 @app.get("/api/allowed")
-async def get_allowed() -> dict:
+async def get_allowed() -> Dict[str, List[str]]:
     """Return all allowed names."""
     return {"allowed": fetch_names("allowed_names")}
 
