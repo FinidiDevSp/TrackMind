@@ -210,3 +210,5 @@ __marimo__/
 
 # Application data
 backend/ban_paths.yaml
+
+backend/database/
