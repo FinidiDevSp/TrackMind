@@ -1,9 +1,9 @@
 """FastAPI application for managing allowed and banned names.
 
 This API exposes endpoints to read and modify the `allowed_names` and
-`banned_names` tables stored in the local SQLite database.  It also
+`banned_names` tables stored in the local SQLite database. It also
 provides endpoints for persisting the BAN/UNBAN directory paths in a
-YAML file so the frontend can restore the previously selected paths.
+JSON file so the frontend can restore the previously selected paths.
 """
 
 from __future__ import annotations
@@ -12,7 +12,7 @@ import sqlite3
 from pathlib import Path
 from typing import List
 
-import yaml
+import json
 from fastapi import FastAPI
 from pydantic import BaseModel
 
@@ -21,7 +21,7 @@ from pydantic import BaseModel
 # ---------------------------------------------------------------------------
 BASE_DIR = Path(__file__).resolve().parent
 DB_PATH = BASE_DIR / "database" / "logs.db"
-CONFIG_PATH = BASE_DIR / "ban_paths.yaml"
+CONFIG_PATH = BASE_DIR / "configs" / "ban_paths.json"
 
 app = FastAPI(title="TrackMind Ban API")
 
@@ -129,7 +129,10 @@ async def delete_banned(name: str) -> dict:
 def read_paths() -> Paths:
     if CONFIG_PATH.exists():
         with CONFIG_PATH.open("r", encoding="utf-8") as fh:
-            data = yaml.safe_load(fh) or {}
+            try:
+                data = json.load(fh) or {}
+            except json.JSONDecodeError:
+                data = {}
     else:
         data = {}
     return Paths(ban_path=data.get("ban_path", ""), unban_path=data.get("unban_path", ""))
@@ -137,15 +140,16 @@ def read_paths() -> Paths:
 
 @app.get("/api/paths")
 async def get_paths() -> dict:
-    """Return the saved BAN and UNBAN paths from the YAML file."""
+    """Return the saved BAN and UNBAN paths from the JSON file."""
     return read_paths().model_dump()
 
 
 @app.post("/api/paths")
 async def save_paths(paths: Paths) -> dict:
-    """Persist BAN and UNBAN paths to the YAML configuration file."""
+    """Persist BAN and UNBAN paths to the JSON configuration file."""
+    CONFIG_PATH.parent.mkdir(parents=True, exist_ok=True)
     with CONFIG_PATH.open("w", encoding="utf-8") as fh:
-        yaml.safe_dump(paths.model_dump(), fh)
+        json.dump(paths.model_dump(), fh, ensure_ascii=False, indent=2)
     return {"status": "saved"}
 
 
