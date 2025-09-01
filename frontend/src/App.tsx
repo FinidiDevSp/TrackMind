@@ -21,6 +21,10 @@ function App() {
     return () => clearInterval(id)
   }, [])
 
+  const handleStart = () => {
+    alert(config.banScreenEnabled ? 'OK' : 'NO OK')
+  }
+
   return (
     <div style={{ display: 'flex', height: '100vh' }}>
       <Sidebar
@@ -57,15 +61,17 @@ function App() {
           data-bs-target="#main-breadcrumb"
           tabIndex={0}
         >
-          <button type="button" className="btn btn-primary">
+          <button
+            type="button"
+            className="btn btn-primary"
+            onClick={handleStart}
+          >
             Iniciar
           </button>
           <Suspense fallback={<div>Cargando...</div>}>
             {activeTab === 'BEATPORT' && <BeatportTab />}
             {activeTab === '1001TRACKLIST' && <TracklistTab />}
-            {config.banScreenEnabled && activeTab === 'BAN/UNBAN' && (
-              <BanTab />
-            )}
+            {activeTab === 'BAN/UNBAN' && <BanTab />}
             {activeTab === 'OTROS' && <OtrosTab />}
           </Suspense>
         </div>
