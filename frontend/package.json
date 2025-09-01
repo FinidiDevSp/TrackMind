@@ -11,10 +11,10 @@
     "changelog": "node scripts/generate-changelog.js"
   },
   "dependencies": {
+    "@fortawesome/fontawesome-free": "^6.7.2",
     "bootstrap": "^5.3.8",
     "react": "^19.1.1",
-    "react-dom": "^19.1.1",
-    "@fortawesome/fontawesome-free": "^6.5.2"
+    "react-dom": "^19.1.1"
   },
   "devDependencies": {
     "@eslint/js": "^9.33.0",
