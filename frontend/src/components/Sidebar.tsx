@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import './Sidebar.css'
 
 export type Tab = 'BEATPORT' | '1001TRACKLIST' | 'BAN/UNBAN' | 'OTROS'
@@ -20,19 +20,10 @@ const tabIcons: Record<Tab, string> = {
 
 const Sidebar = ({ activeTab, onTabChange, onSettingsClick }: SidebarProps) => {
   const [collapsed, setCollapsed] = useState(false)
-  const [time, setTime] = useState(new Date())
-
-  useEffect(() => {
-    const interval = setInterval(() => setTime(new Date()), 1000)
-    return () => clearInterval(interval)
-  }, [])
-
-  const formattedTime = time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
 
   return (
     <aside className={`sidebar${collapsed ? ' sidebar--collapsed' : ''}`}>
       <div className="sidebar__top">
-        <span className="sidebar__time">{formattedTime}</span>
         <button
           className="sidebar__toggle"
           aria-label="Alternar menú"
