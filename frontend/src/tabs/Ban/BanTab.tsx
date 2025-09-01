@@ -1,5 +1,5 @@
 import { Fragment, useState } from 'react'
-import { FaTrash, FaFolder, FaFolderOpen } from 'react-icons/fa'
+import { FaTrash, FaFolder, FaFolderOpen, FaSearch } from 'react-icons/fa'
 import Toast from '../../components/Toast'
 import './BanTab.css'
 
@@ -50,7 +50,8 @@ const BanTab = () => {
     { id: 24, name: 'Flota' },
   ])
 
-  const [searchTerm, setSearchTerm] = useState('')
+  const [banSearchTerm, setBanSearchTerm] = useState('')
+  const [unbanSearchTerm, setUnbanSearchTerm] = useState('')
   const [toast, setToast] = useState('')
   const [lastRemoved, setLastRemoved] = useState<
     { item: Item; from: 'ban' | 'unban' } | null
@@ -147,11 +148,11 @@ const BanTab = () => {
   const groupedBan = groupByLetter(banList)
   const groupedUnban = groupByLetter(unbanList)
 
-  const filterGroups = (groups: Record<string, Item[]>) =>
+  const filterGroups = (groups: Record<string, Item[]>, term: string) =>
     Object.entries(groups).reduce<Record<string, Item[]>>(
       (acc, [letter, items]) => {
         const filteredItems = items.filter(item =>
-          item.name.toLowerCase().includes(searchTerm.toLowerCase()),
+          item.name.toLowerCase().includes(term.toLowerCase()),
         )
         if (filteredItems.length) acc[letter] = filteredItems
         return acc
@@ -159,8 +160,8 @@ const BanTab = () => {
       {},
     )
 
-  const filteredGroupedBan = filterGroups(groupedBan)
-  const filteredGroupedUnban = filterGroups(groupedUnban)
+  const filteredGroupedBan = filterGroups(groupedBan, banSearchTerm)
+  const filteredGroupedUnban = filterGroups(groupedUnban, unbanSearchTerm)
 
   return (
     <>
@@ -193,12 +194,15 @@ const BanTab = () => {
             </label>
           </div>
           {banError && <span className="error-message">{banError}</span>}
-        <input
-          type="search"
-          value={searchTerm}
-          onChange={e => setSearchTerm(e.target.value)}
-          placeholder="Buscar..."
-        />
+        <div className="search-input">
+          <FaSearch className="input-icon" />
+          <input
+            type="search"
+            value={banSearchTerm}
+            onChange={e => setBanSearchTerm(e.target.value)}
+            placeholder="Buscar..."
+          />
+        </div>
         <ul
           className={`item-list ${dragOver === 'ban' ? 'drag-over' : ''}`}
           onDragOver={e => e.preventDefault()}
@@ -263,12 +267,15 @@ const BanTab = () => {
           </label>
         </div>
         {unbanError && <span className="error-message">{unbanError}</span>}
-        <input
-          type="search"
-          value={searchTerm}
-          onChange={e => setSearchTerm(e.target.value)}
-          placeholder="Buscar..."
-        />
+        <div className="search-input">
+          <FaSearch className="input-icon" />
+          <input
+            type="search"
+            value={unbanSearchTerm}
+            onChange={e => setUnbanSearchTerm(e.target.value)}
+            placeholder="Buscar..."
+          />
+        </div>
         <ul
           className={`item-list ${dragOver === 'unban' ? 'drag-over' : ''}`}
           onDragOver={e => e.preventDefault()}

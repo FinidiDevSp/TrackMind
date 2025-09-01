@@ -53,6 +53,30 @@
   color: var(--surface-color);
 }
 
+.search-input {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  position: relative;
+}
+
+.search-input .input-icon {
+  position: absolute;
+  left: 10px;
+  color: var(--accent-color);
+  pointer-events: none;
+}
+
+.search-input input[type='search'] {
+  flex: 1;
+  padding: 8px 8px 8px 32px;
+  border: 1px solid var(--accent-color);
+  border-radius: 8px;
+  background-color: var(--surface-color);
+  color: var(--text-color);
+}
+
 .error-message {
   color: var(--accent-color);
   font-size: 0.875rem;
