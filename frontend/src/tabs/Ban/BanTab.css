@@ -2,8 +2,17 @@
   max-height: 60vh;
 }
 
+.list-group-item[draggable="true"] {
+  cursor: grab;
+}
+
+.list-group-item[draggable="true"]:active {
+  cursor: grabbing;
+}
+
 .list-group.drag-over {
   border: 2px dashed var(--bs-warning);
+  cursor: copy;
 }
 
 .letter-header {

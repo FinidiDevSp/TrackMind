@@ -1,6 +1,5 @@
-import { Fragment, useState } from 'react'
+import { Fragment, useEffect, useState } from 'react'
 import { FaTrash, FaFolder, FaFolderOpen, FaSearch } from 'react-icons/fa'
-import Toast from '../../components/Toast'
 import './BanTab.css'
 
 interface Item {
@@ -52,7 +51,9 @@ const BanTab = () => {
 
   const [banSearchTerm, setBanSearchTerm] = useState('')
   const [unbanSearchTerm, setUnbanSearchTerm] = useState('')
-  const [toast, setToast] = useState('')
+  const [alert, setAlert] = useState<
+    { type: 'success' | 'danger'; message: string } | null
+  >(null)
   const [lastRemoved, setLastRemoved] = useState<
     { item: Item; from: 'ban' | 'unban' } | null
   >(null)
@@ -60,6 +61,12 @@ const BanTab = () => {
     { item: Item; from: 'ban' | 'unban' } | null
   >(null)
   const [dragOver, setDragOver] = useState<'ban' | 'unban' | null>(null)
+
+  useEffect(() => {
+    if (!alert) return
+    const timer = setTimeout(() => setAlert(null), 3000)
+    return () => clearTimeout(timer)
+  }, [alert])
 
   const validatePath = async (path: string) => {
     try {
@@ -93,10 +100,15 @@ const BanTab = () => {
     const files = e.target.files
     if (files && files.length > 0) {
       const file = files[0] as File & { path?: string; webkitRelativePath?: string }
-      const path = file.path ?? file.webkitRelativePath?.split('/')[0] ?? ''
+      const path =
+        file.path ||
+        (file.webkitRelativePath
+          ? file.webkitRelativePath.split('/')[0]
+          : file.name)
       setter(path)
       await checkPath(path, errorSetter)
-      setToast(`Carpeta ${type} seleccionada`)
+      setAlert({ type: 'success', message: `Carpeta ${type} seleccionada` })
+      e.target.value = ''
     }
   }
 
@@ -105,7 +117,7 @@ const BanTab = () => {
     if (item && window.confirm(`¿Eliminar ${item.name}?`)) {
       setBanList(prev => prev.filter(i => i.id !== id))
       setLastRemoved({ item, from: 'ban' })
-      setToast(`${item.name} eliminado de BAN`)
+      setAlert({ type: 'danger', message: `${item.name} eliminado de BAN` })
     }
   }
 
@@ -114,7 +126,7 @@ const BanTab = () => {
     if (item && window.confirm(`¿Eliminar ${item.name}?`)) {
       setUnbanList(prev => prev.filter(i => i.id !== id))
       setLastRemoved({ item, from: 'unban' })
-      setToast(`${item.name} eliminado de UNBAN`)
+      setAlert({ type: 'danger', message: `${item.name} eliminado de UNBAN` })
     }
   }
 
@@ -122,10 +134,16 @@ const BanTab = () => {
     if (!lastRemoved) return
     if (lastRemoved.from === 'ban') {
       setBanList(prev => [...prev, lastRemoved.item])
-      setToast(`${lastRemoved.item.name} agregado a BAN`)
+      setAlert({
+        type: 'success',
+        message: `${lastRemoved.item.name} agregado a BAN`,
+      })
     } else {
       setUnbanList(prev => [...prev, lastRemoved.item])
-      setToast(`${lastRemoved.item.name} agregado a UNBAN`)
+      setAlert({
+        type: 'success',
+        message: `${lastRemoved.item.name} agregado a UNBAN`,
+      })
     }
     setLastRemoved(null)
   }
@@ -135,11 +153,17 @@ const BanTab = () => {
     if (target === 'ban') {
       setBanList(prev => [...prev, draggedItem.item])
       setUnbanList(prev => prev.filter(i => i.id !== draggedItem.item.id))
-      setToast(`${draggedItem.item.name} movido a BAN`)
+      setAlert({
+        type: 'success',
+        message: `${draggedItem.item.name} movido a BAN`,
+      })
     } else {
       setUnbanList(prev => [...prev, draggedItem.item])
       setBanList(prev => prev.filter(i => i.id !== draggedItem.item.id))
-      setToast(`${draggedItem.item.name} movido a UNBAN`)
+      setAlert({
+        type: 'success',
+        message: `${draggedItem.item.name} movido a UNBAN`,
+      })
     }
     setDraggedItem(null)
     setDragOver(null)
@@ -196,7 +220,7 @@ const BanTab = () => {
                 htmlFor="ban-folder"
                 aria-label="Seleccionar carpeta BAN"
                 tabIndex={0}
-                className="input-group-text btn btn-outline-secondary"
+                className="input-group-text btn btn-primary"
               >
                 <FaFolderOpen />
               </label>
@@ -237,7 +261,7 @@ const BanTab = () => {
                         <span>{item.name}</span>
                         <button
                           type="button"
-                          className="btn btn-sm btn-outline-danger"
+                          className="btn btn-sm btn-secondary"
                           onClick={() => removeBan(item.id)}
                           aria-label={`Eliminar ${item.name}`}
                         >
@@ -279,7 +303,7 @@ const BanTab = () => {
                 htmlFor="unban-folder"
                 aria-label="Seleccionar carpeta UNBAN"
                 tabIndex={0}
-                className="input-group-text btn btn-outline-secondary"
+                className="input-group-text btn btn-primary"
               >
                 <FaFolderOpen />
               </label>
@@ -320,7 +344,7 @@ const BanTab = () => {
                         <span>{item.name}</span>
                         <button
                           type="button"
-                          className="btn btn-sm btn-outline-danger"
+                          className="btn btn-sm btn-secondary"
                           onClick={() => removeUnban(item.id)}
                           aria-label={`Eliminar ${item.name}`}
                         >
@@ -337,11 +361,24 @@ const BanTab = () => {
       <footer className="text-center mt-3 border-top pt-2">
         Información de la pantalla BAN/UNBAN
       </footer>
-      {toast && <Toast message={toast} onClose={() => setToast('')} />}
+      {alert && (
+        <div
+          className={`alert alert-${alert.type} alert-dismissible fade show position-fixed top-0 start-50 translate-middle-x mt-3`}
+          role="alert"
+        >
+          {alert.message}
+          <button
+            type="button"
+            className="btn-close"
+            aria-label="Close"
+            onClick={() => setAlert(null)}
+          ></button>
+        </div>
+      )}
       {lastRemoved && (
         <button
           type="button"
-          className="btn btn-secondary position-fixed bottom-0 end-0 m-3"
+          className="btn btn-primary position-fixed bottom-0 end-0 m-3"
           onClick={undoRemove}
         >
           Deshacer
