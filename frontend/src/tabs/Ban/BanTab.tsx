@@ -237,7 +237,10 @@ const BanTab = () => {
                 className="form-control"
                 value={banPath}
                 onChange={e => setBanPath(e.target.value)}
-                onBlur={() => checkPath(banPath, 'BAN')}
+                onBlur={e => checkPath(e.target.value, 'BAN')}
+                onKeyDown={e => {
+                  if (e.key === 'Enter') checkPath(e.currentTarget.value, 'BAN')
+                }}
                 placeholder="Ruta BAN"
               />
               <input
@@ -332,7 +335,11 @@ const BanTab = () => {
                 className="form-control"
                 value={unbanPath}
                 onChange={e => setUnbanPath(e.target.value)}
-                onBlur={() => checkPath(unbanPath, 'UNBAN')}
+                onBlur={e => checkPath(e.target.value, 'UNBAN')}
+                onKeyDown={e => {
+                  if (e.key === 'Enter')
+                    checkPath(e.currentTarget.value, 'UNBAN')
+                }}
                 placeholder="Ruta UNBAN"
               />
               <input
