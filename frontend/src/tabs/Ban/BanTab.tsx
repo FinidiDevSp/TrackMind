@@ -1,5 +1,4 @@
 import { Fragment, useEffect, useState } from 'react'
-import { FaTrash, FaFolder, FaFolderOpen, FaSearch } from 'react-icons/fa'
 import './BanTab.css'
 import { apiFetch } from '../../utils/api'
 
@@ -279,7 +278,7 @@ const BanTab = () => {
           <section className="col-md-6 d-flex flex-column">
             <div className="input-group mb-2">
               <span className="input-group-text">
-                <FaFolder />
+                <i className="fa-solid fa-folder" />
               </span>
               <input
                 type="text"
@@ -298,12 +297,12 @@ const BanTab = () => {
                 className="input-group-text btn btn-primary"
                 onClick={() => handleFolderSelect(setBanPath, 'BAN')}
               >
-                <FaFolderOpen />
+                <i className="fa-solid fa-folder-open" />
               </button>
             </div>
             <div className="input-group mb-2">
               <span className="input-group-text">
-                <FaSearch />
+                <i className="fa-solid fa-search" />
               </span>
               <input
                 type="search"
@@ -347,14 +346,14 @@ const BanTab = () => {
                         onDragEnd={() => setDragged(null)}
                       >
                         <span>{item.name}</span>
-                        <button
-                          type="button"
-                          className="btn btn-sm btn-secondary"
-                          onClick={() => removeBan(item.id)}
-                          aria-label={`Eliminar ${item.name}`}
-                        >
-                          <FaTrash />
-                        </button>
+                      <button
+                        type="button"
+                        className="btn btn-sm btn-secondary"
+                        onClick={() => removeBan(item.id)}
+                        aria-label={`Eliminar ${item.name}`}
+                      >
+                        <i className="fa-solid fa-trash" />
+                      </button>
                       </li>
                     ))}
                   </Fragment>
@@ -367,7 +366,7 @@ const BanTab = () => {
           <section className="col-md-6 d-flex flex-column">
             <div className="input-group mb-2">
               <span className="input-group-text">
-                <FaFolder />
+                <i className="fa-solid fa-folder" />
               </span>
               <input
                 type="text"
@@ -387,12 +386,12 @@ const BanTab = () => {
                 className="input-group-text btn btn-primary"
                 onClick={() => handleFolderSelect(setUnbanPath, 'UNBAN')}
               >
-                <FaFolderOpen />
+                <i className="fa-solid fa-folder-open" />
               </button>
             </div>
             <div className="input-group mb-2">
               <span className="input-group-text">
-                <FaSearch />
+                <i className="fa-solid fa-search" />
               </span>
               <input
                 type="search"
@@ -440,7 +439,7 @@ const BanTab = () => {
                           onClick={() => removeUnban(item.id)}
                           aria-label={`Eliminar ${item.name}`}
                         >
-                          <FaTrash />
+                          <i className="fa-solid fa-trash" />
                         </button>
                       </li>
                     ))}
