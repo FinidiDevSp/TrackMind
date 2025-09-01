@@ -71,6 +71,10 @@
   max-height: 60vh;
 }
 
+.item-list.drag-over {
+  border: 2px dashed var(--accent-color);
+}
+
 .letter-header {
   padding: 8px;
   font-weight: bold;
