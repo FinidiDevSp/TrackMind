@@ -24,6 +24,7 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     document.documentElement.dataset.theme = theme
+    document.documentElement.setAttribute('data-bs-theme', theme)
     localStorage.setItem('theme', theme)
   }, [theme])
 
