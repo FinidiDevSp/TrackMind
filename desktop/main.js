@@ -1,5 +1,5 @@
 // desktop/main.js
-const { app, BrowserWindow, dialog, Menu } = require("electron");
+const { app, BrowserWindow, dialog, Menu, ipcMain } = require("electron");
 const path = require("path");
 const { spawn } = require("child_process");
 const kill = require("tree-kill");
@@ -12,6 +12,15 @@ let viteProc = null;
 const FRONTEND_URL = "http://localhost:5173";
 const BACKEND_HOST = "127.0.0.1";
 const BACKEND_PORT = 8000;
+
+ipcMain.handle("select-directory", async () => {
+    const result = await dialog.showOpenDialog({
+        properties: ["openDirectory"],
+    });
+    return result.canceled || result.filePaths.length === 0
+        ? null
+        : result.filePaths[0];
+});
 
 function fileExists(p) {
     try {
@@ -151,7 +160,11 @@ function createWindow() {
     const win = new BrowserWindow({
         width: 1000,
         height: 700,
-        webPreferences: { nodeIntegration: false, contextIsolation: true },
+        webPreferences: {
+            nodeIntegration: false,
+            contextIsolation: true,
+            preload: path.join(__dirname, "preload.js"),
+        },
     });
 
     win.loadURL(FRONTEND_URL).catch((err) => {

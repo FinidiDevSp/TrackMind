@@ -101,29 +101,14 @@ const BanTab = () => {
     return true
   }
 
-  const handleFolderChange = async (
-    e: React.ChangeEvent<HTMLInputElement>,
+  const handleFolderSelect = async (
     setter: React.Dispatch<React.SetStateAction<string>>,
     type: 'BAN' | 'UNBAN',
   ) => {
-    const files = e.target.files
-    if (files && files.length > 0) {
-      const file = files[0] as File & { path?: string; webkitRelativePath?: string }
-      let folderPath = ''
-      if (file.path) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const pathModule = (window as any).require?.('path')
-        folderPath = pathModule
-          ? pathModule.dirname(file.path)
-          : file.path.replace(/[/\\][^/\\]*$/, '')
-      } else if (file.webkitRelativePath) {
-        folderPath = file.webkitRelativePath.split('/')[0]
-      } else {
-        folderPath = file.name
-      }
+    const folderPath = await window.electronAPI?.selectDirectory()
+    if (folderPath) {
       setter(folderPath)
       await checkPath(folderPath, type)
-      e.target.value = ''
     }
   }
 
@@ -307,23 +292,14 @@ const BanTab = () => {
                 }}
                 placeholder="Ruta BAN"
               />
-              <input
-                id="ban-folder"
-                type="file"
-                style={{ display: 'none' }}
-                onChange={e => handleFolderChange(e, setBanPath, 'BAN')}
-                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                // @ts-ignore: permitir selección de carpetas
-                webkitdirectory=""
-              />
-              <label
-                htmlFor="ban-folder"
+              <button
+                type="button"
                 aria-label="Seleccionar carpeta BAN"
-                tabIndex={0}
                 className="input-group-text btn btn-primary"
+                onClick={() => handleFolderSelect(setBanPath, 'BAN')}
               >
                 <FaFolderOpen />
-              </label>
+              </button>
             </div>
             <div className="input-group mb-2">
               <span className="input-group-text">
@@ -405,23 +381,14 @@ const BanTab = () => {
                 }}
                 placeholder="Ruta UNBAN"
               />
-              <input
-                id="unban-folder"
-                type="file"
-                style={{ display: 'none' }}
-                onChange={e => handleFolderChange(e, setUnbanPath, 'UNBAN')}
-                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                // @ts-ignore: permitir selección de carpetas
-                webkitdirectory=""
-              />
-              <label
-                htmlFor="unban-folder"
+              <button
+                type="button"
                 aria-label="Seleccionar carpeta UNBAN"
-                tabIndex={0}
                 className="input-group-text btn btn-primary"
+                onClick={() => handleFolderSelect(setUnbanPath, 'UNBAN')}
               >
                 <FaFolderOpen />
-              </label>
+              </button>
             </div>
             <div className="input-group mb-2">
               <span className="input-group-text">
