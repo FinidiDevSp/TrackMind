@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import './SettingsModal.css'
 import { useTheme } from '../theme/ThemeContext'
+import { useMainConfig } from '../MainConfigContext'
 
 interface ChangelogEntry {
   hash: string
@@ -19,6 +20,7 @@ const SettingsModal = ({ onClose }: SettingsModalProps) => {
   const [entries, setEntries] = useState<ChangelogEntry[]>([])
   const [isClosing, setIsClosing] = useState(false)
   const { theme, setTheme } = useTheme()
+  const { config, setConfig } = useMainConfig()
   const openerRef = useRef<HTMLElement | null>(
     document.activeElement instanceof HTMLElement ? document.activeElement : null
   )
@@ -126,16 +128,30 @@ const SettingsModal = ({ onClose }: SettingsModalProps) => {
           )}
           {activeTab === 'QUICK TAG CUSTOM' && <div className="placeholder">Coming soon...</div>}
           {activeTab === 'GENERAL' && (
-            <div className="theme-toggle">
-              <label>
-                <input
-                  type="checkbox"
-                  checked={theme === 'dark'}
-                  onChange={e => setTheme(e.target.checked ? 'dark' : 'light')}
-                />
-                Dark mode
-              </label>
-            </div>
+            <>
+              <div className="theme-toggle">
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={theme === 'dark'}
+                    onChange={e => setTheme(e.target.checked ? 'dark' : 'light')}
+                  />
+                  Dark mode
+                </label>
+              </div>
+              <div className="theme-toggle">
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={config.banScreenEnabled}
+                    onChange={e =>
+                      setConfig({ ...config, banScreenEnabled: e.target.checked })
+                    }
+                  />
+                  Habilitar Ban/Unban
+                </label>
+              </div>
+            </>
           )}
         </div>
       </div>
