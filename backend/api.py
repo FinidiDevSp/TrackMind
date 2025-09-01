@@ -42,6 +42,12 @@ def verify_api_key(api_key: str | None = Security(api_key_header)) -> bool:
 
 app = FastAPI(title="TrackMind Ban API")
 
+
+@app.get("/api/hello")
+async def hello() -> dict:
+    """Simple endpoint used by the frontend to verify connectivity."""
+    return {"message": "OK"}
+
 # ---------------------------------------------------------------------------
 # Database helpers
 # ---------------------------------------------------------------------------
@@ -92,40 +98,40 @@ class Paths(BaseModel):
 # ---------------------------------------------------------------------------
 
 
-@app.get("/allowed", dependencies=[Depends(verify_api_key)])
+@app.get("/api/allowed", dependencies=[Depends(verify_api_key)])
 async def get_allowed() -> dict:
     """Return all allowed names."""
     return {"allowed": fetch_names("allowed_names")}
 
 
-@app.get("/banned", dependencies=[Depends(verify_api_key)])
+@app.get("/api/banned", dependencies=[Depends(verify_api_key)])
 async def get_banned() -> dict:
     """Return all banned names."""
     return {"banned": fetch_names("banned_names")}
 
 
-@app.post("/ban", dependencies=[Depends(verify_api_key)])
+@app.post("/api/ban", dependencies=[Depends(verify_api_key)])
 async def ban_name(item: NameItem) -> dict:
     """Move a name from allowed_names to banned_names."""
     move_name("allowed_names", "banned_names", item.name)
     return {"status": "banned", "name": item.name}
 
 
-@app.post("/unban", dependencies=[Depends(verify_api_key)])
+@app.post("/api/unban", dependencies=[Depends(verify_api_key)])
 async def unban_name(item: NameItem) -> dict:
     """Move a name from banned_names to allowed_names."""
     move_name("banned_names", "allowed_names", item.name)
     return {"status": "unbanned", "name": item.name}
 
 
-@app.delete("/allowed/{name}", dependencies=[Depends(verify_api_key)])
+@app.delete("/api/allowed/{name}", dependencies=[Depends(verify_api_key)])
 async def delete_allowed(name: str) -> dict:
     """Delete a name from the allowed_names table."""
     delete_name("allowed_names", name)
     return {"status": "deleted", "table": "allowed", "name": name}
 
 
-@app.delete("/banned/{name}", dependencies=[Depends(verify_api_key)])
+@app.delete("/api/banned/{name}", dependencies=[Depends(verify_api_key)])
 async def delete_banned(name: str) -> dict:
     """Delete a name from the banned_names table."""
     delete_name("banned_names", name)
@@ -146,13 +152,13 @@ def read_paths() -> Paths:
     return Paths(ban_path=data.get("ban_path", ""), unban_path=data.get("unban_path", ""))
 
 
-@app.get("/paths", dependencies=[Depends(verify_api_key)])
+@app.get("/api/paths", dependencies=[Depends(verify_api_key)])
 async def get_paths() -> dict:
     """Return the saved BAN and UNBAN paths from the YAML file."""
     return read_paths().model_dump()
 
 
-@app.post("/paths", dependencies=[Depends(verify_api_key)])
+@app.post("/api/paths", dependencies=[Depends(verify_api_key)])
 async def save_paths(paths: Paths) -> dict:
     """Persist BAN and UNBAN paths to the YAML configuration file."""
     with CONFIG_PATH.open("w", encoding="utf-8") as fh:
