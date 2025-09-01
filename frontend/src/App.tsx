@@ -1,5 +1,4 @@
 import { useEffect, useState, lazy, Suspense } from 'react'
-import { useMainConfig } from './MainConfigContext'
 import Sidebar, { type Tab } from './components/Sidebar'
 import SettingsModal from './components/SettingsModal'
 import { apiFetch } from './utils/api'
@@ -13,7 +12,6 @@ function App() {
   const [activeTab, setActiveTab] = useState<Tab>('BEATPORT')
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [time, setTime] = useState(new Date().toLocaleTimeString())
-  const { config } = useMainConfig()
 
   useEffect(() => {
     const id = setInterval(() => {
@@ -23,9 +21,6 @@ function App() {
   }, [])
 
   const handleStart = async () => {
-    if (!config.banScreenEnabled) {
-      return
-    }
     try {
       const res = await apiFetch('/tracklists/start', {
         method: 'POST',
