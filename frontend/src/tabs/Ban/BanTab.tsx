@@ -1,6 +1,7 @@
 import { Fragment, useEffect, useState } from 'react'
 import { FaTrash, FaFolder, FaFolderOpen, FaSearch } from 'react-icons/fa'
 import './BanTab.css'
+import { apiFetch } from '../../utils/api'
 
 interface Item {
   id: number
@@ -18,35 +19,8 @@ const groupByLetter = (items: Item[]) =>
 const BanTab = () => {
   const [banPath, setBanPath] = useState('')
   const [unbanPath, setUnbanPath] = useState('')
-  const [banList, setBanList] = useState<Item[]>([
-    { id: 1, name: 'Alpha Song' },
-    { id: 2, name: 'Amanecer' },
-    { id: 3, name: 'Bravo Beat' },
-    { id: 4, name: 'Blue Sky' },
-    { id: 5, name: 'Crazy Tune' },
-    { id: 6, name: 'Crystal' },
-    { id: 7, name: 'Danza' },
-    { id: 8, name: 'Dreamer' },
-    { id: 9, name: 'Eclipse' },
-    { id: 10, name: 'Emerald' },
-    { id: 11, name: 'Fuego' },
-    { id: 12, name: 'Fiesta' },
-  ])
-  const [unbanList, setUnbanList] = useState<Item[]>([
-    { id: 13, name: 'Azul' },
-    { id: 14, name: 'Alfa' },
-    { id: 15, name: 'Brisa' },
-    { id: 16, name: 'Barco' },
-    { id: 17, name: 'Corazon' },
-    { id: 18, name: 'Cielo' },
-    { id: 19, name: 'Diamante' },
-    { id: 20, name: 'Dragon' },
-    { id: 21, name: 'Estrella' },
-    { id: 22, name: 'Espada' },
-    { id: 23, name: 'Faro' },
-    { id: 24, name: 'Flota' },
-  ])
-
+  const [banList, setBanList] = useState<Item[]>([])
+  const [unbanList, setUnbanList] = useState<Item[]>([])
   const [banSearchTerm, setBanSearchTerm] = useState('')
   const [unbanSearchTerm, setUnbanSearchTerm] = useState('')
   const [alert, setAlert] = useState<
@@ -61,6 +35,28 @@ const BanTab = () => {
     | null
   >(null)
   const [dragOver, setDragOver] = useState<'ban' | 'unban' | null>(null)
+
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        const [banned, allowed, paths] = await Promise.all([
+          apiFetch('/banned'),
+          apiFetch('/allowed'),
+          apiFetch('/paths'),
+        ])
+        let idCounter = 1
+        setBanList(banned.banned.map((name: string) => ({ id: idCounter++, name })))
+        setUnbanList(
+          allowed.allowed.map((name: string) => ({ id: idCounter++, name })),
+        )
+        setBanPath(paths.ban_path || '')
+        setUnbanPath(paths.unban_path || '')
+      } catch {
+        setAlert({ type: 'danger', message: 'Error cargando datos del servidor' })
+      }
+    }
+    loadData()
+  }, [])
 
   useEffect(() => {
     if (!alert) return
@@ -90,8 +86,22 @@ const BanTab = () => {
         type: 'danger',
         message: `Ruta ${type} inválida o inaccesible`,
       })
+      return false
     }
-    return valid
+    try {
+      const payload = {
+        ban_path: type === 'BAN' ? path : banPath,
+        unban_path: type === 'UNBAN' ? path : unbanPath,
+      }
+      await apiFetch('/paths', {
+        method: 'POST',
+        body: JSON.stringify(payload),
+      })
+      setAlert({ type: 'success', message: `Carpeta ${type} seleccionada` })
+    } catch {
+      setAlert({ type: 'danger', message: `Error guardando ruta ${type}` })
+    }
+    return true
   }
 
   const handleFolderChange = async (
@@ -115,90 +125,147 @@ const BanTab = () => {
         folderPath = file.name
       }
       setter(folderPath)
-      const valid = await checkPath(folderPath, type)
-      if (valid)
-        setAlert({ type: 'success', message: `Carpeta ${type} seleccionada` })
+      await checkPath(folderPath, type)
       e.target.value = ''
     }
   }
 
-  const removeBan = (id: number) => {
+  const removeBan = async (id: number) => {
     const item = banList.find(i => i.id === id)
     if (item && window.confirm(`¿Eliminar ${item.name}?`)) {
-      setBanList(prev => prev.filter(i => i.id !== id))
-      setLastRemoved({ item, from: 'ban' })
-      setAlert({ type: 'danger', message: `${item.name} eliminado de BAN` })
+      try {
+        await apiFetch(`/banned/${encodeURIComponent(item.name)}`, {
+          method: 'DELETE',
+        })
+        setBanList(prev => prev.filter(i => i.id !== id))
+        setLastRemoved({ item, from: 'ban' })
+        setAlert({ type: 'danger', message: `${item.name} eliminado de BAN` })
+      } catch {
+        setAlert({ type: 'danger', message: `Error eliminando ${item.name}` })
+      }
     }
   }
 
-  const removeUnban = (id: number) => {
+  const removeUnban = async (id: number) => {
     const item = unbanList.find(i => i.id === id)
     if (item && window.confirm(`¿Eliminar ${item.name}?`)) {
-      setUnbanList(prev => prev.filter(i => i.id !== id))
-      setLastRemoved({ item, from: 'unban' })
-      setAlert({ type: 'danger', message: `${item.name} eliminado de UNBAN` })
+      try {
+        await apiFetch(`/allowed/${encodeURIComponent(item.name)}`, {
+          method: 'DELETE',
+        })
+        setUnbanList(prev => prev.filter(i => i.id !== id))
+        setLastRemoved({ item, from: 'unban' })
+        setAlert({ type: 'danger', message: `${item.name} eliminado de UNBAN` })
+      } catch {
+        setAlert({ type: 'danger', message: `Error eliminando ${item.name}` })
+      }
     }
   }
 
-  const undoRemove = () => {
+  const undoRemove = async () => {
     if (!lastRemoved) return
-    if (lastRemoved.from === 'ban') {
-      setBanList(prev => [...prev, lastRemoved.item])
-      setAlert({
-        type: 'success',
-        message: `${lastRemoved.item.name} agregado a BAN`,
-      })
-    } else {
-      setUnbanList(prev => [...prev, lastRemoved.item])
-      setAlert({
-        type: 'success',
-        message: `${lastRemoved.item.name} agregado a UNBAN`,
-      })
-    }
-    setLastRemoved(null)
-  }
-
-  const handleDrop = (target: 'ban' | 'unban') => {
-    if (!dragged || dragged.from === target) return
-    if (dragged.type === 'item') {
-      if (target === 'ban') {
-        setBanList(prev => [...prev, dragged.item])
-        setUnbanList(prev => prev.filter(i => i.id !== dragged.item.id))
+    try {
+      if (lastRemoved.from === 'ban') {
+        await apiFetch('/ban', {
+          method: 'POST',
+          body: JSON.stringify({ name: lastRemoved.item.name }),
+        })
+        setBanList(prev => [...prev, lastRemoved.item])
         setAlert({
           type: 'success',
-          message: `${dragged.item.name} movido a BAN`,
+          message: `${lastRemoved.item.name} agregado a BAN`,
         })
       } else {
-        setUnbanList(prev => [...prev, dragged.item])
-        setBanList(prev => prev.filter(i => i.id !== dragged.item.id))
+        await apiFetch('/unban', {
+          method: 'POST',
+          body: JSON.stringify({ name: lastRemoved.item.name }),
+        })
+        setUnbanList(prev => [...prev, lastRemoved.item])
         setAlert({
           type: 'success',
-          message: `${dragged.item.name} movido a UNBAN`,
+          message: `${lastRemoved.item.name} agregado a UNBAN`,
         })
+      }
+      setLastRemoved(null)
+    } catch {
+      setAlert({ type: 'danger', message: 'Error restaurando elemento' })
+    }
+  }
+
+  const handleDrop = async (target: 'ban' | 'unban') => {
+    if (!dragged || dragged.from === target) return
+    if (dragged.type === 'item') {
+      const name = dragged.item.name
+      try {
+        if (target === 'ban') {
+          await apiFetch('/ban', {
+            method: 'POST',
+            body: JSON.stringify({ name }),
+          })
+          setBanList(prev => [...prev, dragged.item])
+          setUnbanList(prev => prev.filter(i => i.id !== dragged.item.id))
+          setAlert({
+            type: 'success',
+            message: `${name} movido a BAN`,
+          })
+        } else {
+          await apiFetch('/unban', {
+            method: 'POST',
+            body: JSON.stringify({ name }),
+          })
+          setUnbanList(prev => [...prev, dragged.item])
+          setBanList(prev => prev.filter(i => i.id !== dragged.item.id))
+          setAlert({
+            type: 'success',
+            message: `${name} movido a UNBAN`,
+          })
+        }
+      } catch {
+        setAlert({ type: 'danger', message: `Error moviendo ${name}` })
       }
     } else {
       const sourceList = dragged.from === 'ban' ? banList : unbanList
       const itemsToMove = sourceList.filter(i =>
         i.name.toUpperCase().startsWith(dragged.letter),
       )
-      if (target === 'ban') {
-        setBanList(prev => [...prev, ...itemsToMove])
-        setUnbanList(prev =>
-          prev.filter(i => !i.name.toUpperCase().startsWith(dragged.letter)),
-        )
-        setAlert({
-          type: 'success',
-          message: `Elementos '${dragged.letter}' movidos a BAN`,
-        })
-      } else {
-        setUnbanList(prev => [...prev, ...itemsToMove])
-        setBanList(prev =>
-          prev.filter(i => !i.name.toUpperCase().startsWith(dragged.letter)),
-        )
-        setAlert({
-          type: 'success',
-          message: `Elementos '${dragged.letter}' movidos a UNBAN`,
-        })
+      try {
+        if (target === 'ban') {
+          await Promise.all(
+            itemsToMove.map(item =>
+              apiFetch('/ban', {
+                method: 'POST',
+                body: JSON.stringify({ name: item.name }),
+              }),
+            ),
+          )
+          setBanList(prev => [...prev, ...itemsToMove])
+          setUnbanList(prev =>
+            prev.filter(i => !i.name.toUpperCase().startsWith(dragged.letter)),
+          )
+          setAlert({
+            type: 'success',
+            message: `Elementos '${dragged.letter}' movidos a BAN`,
+          })
+        } else {
+          await Promise.all(
+            itemsToMove.map(item =>
+              apiFetch('/unban', {
+                method: 'POST',
+                body: JSON.stringify({ name: item.name }),
+              }),
+            ),
+          )
+          setUnbanList(prev => [...prev, ...itemsToMove])
+          setBanList(prev =>
+            prev.filter(i => !i.name.toUpperCase().startsWith(dragged.letter)),
+          )
+          setAlert({
+            type: 'success',
+            message: `Elementos '${dragged.letter}' movidos a UNBAN`,
+          })
+        }
+      } catch {
+        setAlert({ type: 'danger', message: 'Error moviendo elementos' })
       }
     }
     setDragged(null)
@@ -324,7 +391,6 @@ const BanTab = () => {
               <span className="badge bg-secondary">{banList.length} elementos</span>
             </div>
           </section>
-
           <section className="col-md-6 d-flex flex-column">
             <div className="input-group mb-2">
               <span className="input-group-text">
