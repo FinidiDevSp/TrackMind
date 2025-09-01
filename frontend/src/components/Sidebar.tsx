@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import './Sidebar.css'
 
 export type Tab = 'BEATPORT' | '1001TRACKLIST' | 'BAN/UNBAN' | 'OTROS'
@@ -17,46 +18,49 @@ const tabIcons: Record<Tab, string> = {
   OTROS: 'fa-solid fa-ellipsis-h',
 }
 
-const Sidebar = ({ activeTab, onTabChange, onSettingsClick }: SidebarProps) => (
-  <div className="d-flex">
-    <button
-      className="sidebar__toggle btn btn-link"
-      type="button"
-      data-bs-toggle="collapse"
-      data-bs-target="#sidebarMenu"
-      aria-controls="sidebarMenu"
-      aria-label="Alternar menú"
-    >
-      <i className="fa-solid fa-bars" />
-    </button>
-    <div className="collapse collapse-horizontal show" id="sidebarMenu" style={{ width: '200px' }}>
-      <aside className="sidebar">
+const Sidebar = ({ activeTab, onTabChange, onSettingsClick }: SidebarProps) => {
+  const [collapsed, setCollapsed] = useState(false)
+
+  return (
+    <aside className={`sidebar${collapsed ? ' sidebar--collapsed' : ''}`}>
+      <button
+        className="sidebar__toggle"
+        aria-label="Alternar menú"
+        onClick={() => setCollapsed(prev => !prev)}
+      >
+        <i className={`fa-solid ${collapsed ? 'fa-chevron-right' : 'fa-chevron-left'}`} />
+      </button>
+      {!collapsed && (
         <div className="sidebar__header">
           <div className="sidebar__avatar" />
           <span className="sidebar__name">GORKA</span>
         </div>
-        <nav className="sidebar__nav" role="tablist">
-          {tabs.map(tab => (
-            <button
-              key={tab}
-              className={`sidebar__tab${activeTab === tab ? ' sidebar__tab--active' : ''}`}
-              onClick={() => onTabChange(tab)}
-              role="tab"
-              aria-selected={activeTab === tab}
-            >
-              <i className={tabIcons[tab]} />
-              <span>{tab}</span>
-            </button>
-          ))}
-        </nav>
-        <button className="sidebar__settings" aria-label="Abrir configuración" onClick={onSettingsClick}>
-          <i className="fa-solid fa-gear" />
-          <span>Configuración</span>
-        </button>
-      </aside>
-    </div>
-  </div>
-)
+      )}
+      <nav className="sidebar__nav" role="tablist">
+        {tabs.map(tab => (
+          <button
+            key={tab}
+            className={`sidebar__tab${activeTab === tab ? ' sidebar__tab--active' : ''}`}
+            onClick={() => onTabChange(tab)}
+            role="tab"
+            aria-selected={activeTab === tab}
+          >
+            <i className={tabIcons[tab]} />
+            {!collapsed && <span>{tab}</span>}
+          </button>
+        ))}
+      </nav>
+      <button
+        className="sidebar__settings"
+        aria-label="Abrir configuración"
+        onClick={onSettingsClick}
+      >
+        <i className="fa-solid fa-gear" />
+        {!collapsed && <span>Configuración</span>}
+      </button>
+    </aside>
+  )
+}
 
 export default Sidebar
 
