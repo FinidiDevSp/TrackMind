@@ -97,7 +97,7 @@ const SettingsModal = ({ onClose }: SettingsModalProps) => {
             &times;
           </button>
         </div>
-        <div className="settings-tabs">
+        <div className="settings-tabs" id="settings-tabs">
           {(['CHANGELOG', 'QUICK TAG CUSTOM', 'GENERAL'] as Tab[]).map(tab => (
             <button
               key={tab}
@@ -108,7 +108,12 @@ const SettingsModal = ({ onClose }: SettingsModalProps) => {
             </button>
           ))}
         </div>
-        <div className="settings-content">
+        <div
+          className="settings-content"
+          data-bs-spy="scroll"
+          data-bs-target="#settings-tabs"
+          tabIndex={0}
+        >
           {activeTab === 'CHANGELOG' && (
             <ul className="changelog-list">
               {entries.map(e => (

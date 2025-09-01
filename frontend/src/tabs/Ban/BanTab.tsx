@@ -314,6 +314,8 @@ const BanTab = () => {
             </div>
             <ul
               className={`list-group flex-grow-1 overflow-auto ${dragOver === 'ban' ? 'drag-over' : ''}`}
+              data-bs-spy="scroll"
+              tabIndex={0}
               onDragOver={e => e.preventDefault()}
               onDragEnter={() => setDragOver('ban')}
               onDragLeave={() => setDragOver(null)}
@@ -403,6 +405,8 @@ const BanTab = () => {
             </div>
             <ul
               className={`list-group flex-grow-1 overflow-auto ${dragOver === 'unban' ? 'drag-over' : ''}`}
+              data-bs-spy="scroll"
+              tabIndex={0}
               onDragOver={e => e.preventDefault()}
               onDragEnter={() => setDragOver('unban')}
               onDragLeave={() => setDragOver(null)}
