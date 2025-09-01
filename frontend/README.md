@@ -82,3 +82,11 @@ VITE_API_BASE=https://api.ejemplo.com/api
 
 Vite expone esta variable como `import.meta.env.VITE_API_BASE`. El archivo `frontend/src/config.ts` la lee para construir las URLs del backend.
 
+
+Además, si el backend requiere autenticación, define la variable `VITE_API_KEY`:
+
+```bash
+VITE_API_KEY=mi_clave
+```
+
+La aplicación enviará esta clave en la cabecera `X-API-Key` en cada petición.
