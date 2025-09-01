@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useMainConfig } from '../MainConfigContext'
 import './Sidebar.css'
 
 export type Tab = 'BEATPORT' | '1001TRACKLIST' | 'BAN/UNBAN' | 'OTROS'
@@ -9,8 +10,6 @@ interface SidebarProps {
   onSettingsClick: () => void
 }
 
-const tabs: Tab[] = ['BEATPORT', '1001TRACKLIST', 'BAN/UNBAN', 'OTROS']
-
 const tabIcons: Record<Tab, string> = {
   BEATPORT: 'fa-solid fa-music',
   '1001TRACKLIST': 'fa-solid fa-list',
@@ -20,6 +19,10 @@ const tabIcons: Record<Tab, string> = {
 
 const Sidebar = ({ activeTab, onTabChange, onSettingsClick }: SidebarProps) => {
   const [collapsed, setCollapsed] = useState(false)
+  const { config } = useMainConfig()
+  const tabs: Tab[] = config.banScreenEnabled
+    ? ['BEATPORT', '1001TRACKLIST', 'BAN/UNBAN', 'OTROS']
+    : ['BEATPORT', '1001TRACKLIST', 'OTROS']
 
   return (
     <aside className={`sidebar${collapsed ? ' sidebar--collapsed' : ''}`}>
