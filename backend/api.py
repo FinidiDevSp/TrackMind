@@ -4,22 +4,16 @@ This API exposes endpoints to read and modify the `allowed_names` and
 `banned_names` tables stored in the local SQLite database.  It also
 provides endpoints for persisting the BAN/UNBAN directory paths in a
 YAML file so the frontend can restore the previously selected paths.
-
-The endpoints are secured using a simple API key that must be supplied
-in the `X-API-Key` header.  The expected key should be stored in the
-`API_KEY` environment variable when the application is executed.
 """
 
 from __future__ import annotations
 
-import os
 import sqlite3
 from pathlib import Path
 from typing import List
 
 import yaml
-from fastapi import Depends, FastAPI, HTTPException, Security
-from fastapi.security import APIKeyHeader
+from fastapi import FastAPI
 from pydantic import BaseModel
 
 # ---------------------------------------------------------------------------
@@ -28,17 +22,6 @@ from pydantic import BaseModel
 BASE_DIR = Path(__file__).resolve().parent
 DB_PATH = BASE_DIR / "database" / "logs.db"
 CONFIG_PATH = BASE_DIR / "ban_paths.yaml"
-
-API_KEY = os.getenv("API_KEY")
-api_key_header = APIKeyHeader(name="X-API-Key", auto_error=False)
-
-
-def verify_api_key(api_key: str | None = Security(api_key_header)) -> bool:
-    """Dependency that verifies the provided API key."""
-    if API_KEY and api_key == API_KEY:
-        return True
-    raise HTTPException(status_code=401, detail="Invalid or missing API Key")
-
 
 app = FastAPI(title="TrackMind Ban API")
 
@@ -98,40 +81,40 @@ class Paths(BaseModel):
 # ---------------------------------------------------------------------------
 
 
-@app.get("/api/allowed", dependencies=[Depends(verify_api_key)])
+@app.get("/api/allowed")
 async def get_allowed() -> dict:
     """Return all allowed names."""
     return {"allowed": fetch_names("allowed_names")}
 
 
-@app.get("/api/banned", dependencies=[Depends(verify_api_key)])
+@app.get("/api/banned")
 async def get_banned() -> dict:
     """Return all banned names."""
     return {"banned": fetch_names("banned_names")}
 
 
-@app.post("/api/ban", dependencies=[Depends(verify_api_key)])
+@app.post("/api/ban")
 async def ban_name(item: NameItem) -> dict:
     """Move a name from allowed_names to banned_names."""
     move_name("allowed_names", "banned_names", item.name)
     return {"status": "banned", "name": item.name}
 
 
-@app.post("/api/unban", dependencies=[Depends(verify_api_key)])
+@app.post("/api/unban")
 async def unban_name(item: NameItem) -> dict:
     """Move a name from banned_names to allowed_names."""
     move_name("banned_names", "allowed_names", item.name)
     return {"status": "unbanned", "name": item.name}
 
 
-@app.delete("/api/allowed/{name}", dependencies=[Depends(verify_api_key)])
+@app.delete("/api/allowed/{name}")
 async def delete_allowed(name: str) -> dict:
     """Delete a name from the allowed_names table."""
     delete_name("allowed_names", name)
     return {"status": "deleted", "table": "allowed", "name": name}
 
 
-@app.delete("/api/banned/{name}", dependencies=[Depends(verify_api_key)])
+@app.delete("/api/banned/{name}")
 async def delete_banned(name: str) -> dict:
     """Delete a name from the banned_names table."""
     delete_name("banned_names", name)
@@ -152,13 +135,13 @@ def read_paths() -> Paths:
     return Paths(ban_path=data.get("ban_path", ""), unban_path=data.get("unban_path", ""))
 
 
-@app.get("/api/paths", dependencies=[Depends(verify_api_key)])
+@app.get("/api/paths")
 async def get_paths() -> dict:
     """Return the saved BAN and UNBAN paths from the YAML file."""
     return read_paths().model_dump()
 
 
-@app.post("/api/paths", dependencies=[Depends(verify_api_key)])
+@app.post("/api/paths")
 async def save_paths(paths: Paths) -> dict:
     """Persist BAN and UNBAN paths to the YAML configuration file."""
     with CONFIG_PATH.open("w", encoding="utf-8") as fh:
