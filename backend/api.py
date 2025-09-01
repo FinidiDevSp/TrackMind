@@ -1,7 +1,7 @@
 """FastAPI application for managing allowed and banned names.
 
 This API exposes endpoints to read and modify the `allowed_names` and
-`banned_names` tables stored in the local SQLite database. It also
+`ban_names` tables stored in the local SQLite database. It also
 provides endpoints for persisting the BAN/UNBAN directory paths in a
 JSON file so the frontend can restore the previously selected paths.
 """
@@ -10,10 +10,11 @@ from __future__ import annotations
 
 import sqlite3
 from pathlib import Path
-from typing import List
+from typing import List, Dict
 
 import json
-from fastapi import FastAPI, HTTPException
+import shutil
+from fastapi import FastAPI, HTTPException, APIRouter
 from pydantic import BaseModel
 
 # ---------------------------------------------------------------------------
@@ -23,7 +24,9 @@ BASE_DIR = Path(__file__).resolve().parent
 DB_PATH = BASE_DIR / "database" / "logs.db"
 CONFIG_PATH = BASE_DIR / "configs" / "ban_paths.json"
 
-app = FastAPI(title="TrackMind Ban API")
+app = FastAPI(title="TrackMind API")
+ban_router = APIRouter(prefix="/ban", tags=["ban"])
+track_router = APIRouter(prefix="/tracklists", tags=["tracklists"])
 
 
 @app.get("/api/hello")
@@ -63,6 +66,13 @@ def delete_name(table: str, name: str) -> None:
         conn.commit()
 
 
+def insert_name(table: str, name: str) -> None:
+    """Insert a name into the specified table if it doesn't already exist."""
+    with get_connection() as conn:
+        conn.execute(f"INSERT OR IGNORE INTO {table}(name) VALUES (?)", (name,))
+        conn.commit()
+
+
 # ---------------------------------------------------------------------------
 # Pydantic models
 # ---------------------------------------------------------------------------
@@ -80,6 +90,10 @@ class PathCheck(BaseModel):
     path: str
 
 
+class StartRequest(BaseModel):
+    ban_unban_active: bool = False
+
+
 def is_valid_directory(path_str: str) -> bool:
     """Return True if the given path exists and is a directory."""
     try:
@@ -94,49 +108,47 @@ def is_valid_directory(path_str: str) -> bool:
 # ---------------------------------------------------------------------------
 
 
-from typing import Dict
-
-@app.get("/api/allowed")
+@ban_router.get("/allowed")
 async def get_allowed() -> Dict[str, List[str]]:
     """Return all allowed names."""
     return {"allowed": fetch_names("allowed_names")}
 
 
-@app.get("/api/banned")
-async def get_banned() -> dict:
+@ban_router.get("/banned")
+async def get_banned() -> Dict[str, List[str]]:
     """Return all banned names."""
-    return {"banned": fetch_names("banned_names")}
+    return {"banned": fetch_names("ban_names")}
 
 
-@app.post("/api/ban")
+@ban_router.post("/ban")
 async def ban_name(item: NameItem) -> dict:
-    """Move a name from allowed_names to banned_names."""
-    move_name("allowed_names", "banned_names", item.name)
+    """Move a name from allowed_names to ban_names."""
+    move_name("allowed_names", "ban_names", item.name)
     return {"status": "banned", "name": item.name}
 
 
-@app.post("/api/unban")
+@ban_router.post("/unban")
 async def unban_name(item: NameItem) -> dict:
-    """Move a name from banned_names to allowed_names."""
-    move_name("banned_names", "allowed_names", item.name)
+    """Move a name from ban_names to allowed_names."""
+    move_name("ban_names", "allowed_names", item.name)
     return {"status": "unbanned", "name": item.name}
 
 
-@app.delete("/api/allowed/{name}")
+@ban_router.delete("/allowed/{name}")
 async def delete_allowed(name: str) -> dict:
     """Delete a name from the allowed_names table."""
     delete_name("allowed_names", name)
     return {"status": "deleted", "table": "allowed", "name": name}
 
 
-@app.delete("/api/banned/{name}")
+@ban_router.delete("/banned/{name}")
 async def delete_banned(name: str) -> dict:
-    """Delete a name from the banned_names table."""
-    delete_name("banned_names", name)
+    """Delete a name from the ban_names table."""
+    delete_name("ban_names", name)
     return {"status": "deleted", "table": "banned", "name": name}
 
 
-@app.post("/api/validate-path")
+@ban_router.post("/validate-path")
 async def validate_path(item: PathCheck) -> dict:
     """Validate that the provided path exists and is a directory."""
     return {"valid": is_valid_directory(item.path)}
@@ -159,13 +171,13 @@ def read_paths() -> Paths:
     return Paths(ban_path=data.get("ban_path", ""), unban_path=data.get("unban_path", ""))
 
 
-@app.get("/api/paths")
+@ban_router.get("/paths")
 async def get_paths() -> dict:
     """Return the saved BAN and UNBAN paths from the JSON file."""
     return read_paths().model_dump()
 
 
-@app.post("/api/paths")
+@ban_router.post("/paths")
 async def save_paths(paths: Paths) -> dict:
     """Persist BAN and UNBAN paths to the JSON configuration file."""
     for p in (paths.ban_path, paths.unban_path):
@@ -175,6 +187,32 @@ async def save_paths(paths: Paths) -> dict:
     with CONFIG_PATH.open("w", encoding="utf-8") as fh:
         json.dump(paths.model_dump(), fh, ensure_ascii=False, indent=2)
     return {"status": "saved"}
+
+
+@track_router.post("/start")
+async def start_processing(req: StartRequest) -> dict:
+    """Process BAN/UNBAN directories when starting 1001tracklists actions."""
+    processed: Dict[str, List[str]] = {"ban": [], "unban": []}
+    if req.ban_unban_active:
+        paths = read_paths()
+        path_mappings = [
+            (paths.ban_path, "ban_names", "ban"),
+            (paths.unban_path, "allowed_names", "unban"),
+        ]
+        for base, table, key in path_mappings:
+            if base:
+                base_path = Path(base)
+                if base_path.exists() and base_path.is_dir():
+                    for child in base_path.iterdir():
+                        if child.is_dir():
+                            insert_name(table, child.name)
+                            shutil.rmtree(child, ignore_errors=True)
+                            processed[key].append(child.name)
+    return {"status": "ok", "processed": processed}
+
+
+app.include_router(ban_router, prefix="/api")
+app.include_router(track_router, prefix="/api")
 
 
 # The application can be served using: uvicorn backend.api:app --reload
