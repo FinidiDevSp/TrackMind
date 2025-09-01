@@ -165,157 +165,185 @@ const BanTab = () => {
 
   return (
     <>
-      <div className="ban-container">
-        <section className="ban-section">
-          <div className="path-input">
-            <FaFolder className="input-icon" />
-            <input
-              type="text"
-              value={banPath}
-              readOnly={false}
-              onChange={e => {
-                setBanPath(e.target.value)
-                setBanError('')
-              }}
-              onBlur={() => checkPath(banPath, setBanError)}
-              placeholder="Ruta BAN"
-            />
-            <input
-              id="ban-folder"
-              type="file"
-              style={{ display: 'none' }}
-              onChange={e => handleFolderChange(e, setBanPath, setBanError, 'BAN')}
-              // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-              // @ts-ignore: permitir selección de carpetas
-              webkitdirectory=""
-            />
-            <label htmlFor="ban-folder" aria-label="Seleccionar carpeta BAN" tabIndex={0}>
-              <FaFolderOpen />
-            </label>
-          </div>
-          {banError && <span className="error-message">{banError}</span>}
-        <div className="search-input">
-          <FaSearch className="input-icon" />
-          <input
-            type="search"
-            value={banSearchTerm}
-            onChange={e => setBanSearchTerm(e.target.value)}
-            placeholder="Buscar..."
-          />
-        </div>
-        <ul
-          className={`item-list ${dragOver === 'ban' ? 'drag-over' : ''}`}
-          onDragOver={e => e.preventDefault()}
-          onDragEnter={() => setDragOver('ban')}
-          onDragLeave={() => setDragOver(null)}
-          onDrop={() => handleDrop('ban')}
-        >
-          {Object.entries(filteredGroupedBan)
-            .sort(([a], [b]) => a.localeCompare(b))
-            .map(([letter, items]) => (
-              <Fragment key={letter}>
-                <li className="letter-header">{letter}</li>
-                {items.map(item => (
-                  <li
-                    key={item.id}
-                    className="item-row"
-                    draggable
-                    onDragStart={() => setDraggedItem({ item, from: 'ban' })}
-                    onDragEnd={() => setDraggedItem(null)}
-                  >
-                    <span>{item.name}</span>
-                    <button
-                      type="button"
-                      className="item-remove"
-                      onClick={() => removeBan(item.id)}
-                      aria-label={`Eliminar ${item.name}`}
-                    >
-                      <FaTrash />
-                    </button>
-                  </li>
+      <div className="container my-3">
+        <div className="row g-3">
+          <section className="col-md-6 d-flex flex-column">
+            <div className="input-group mb-2">
+              <span className="input-group-text">
+                <FaFolder />
+              </span>
+              <input
+                type="text"
+                className="form-control"
+                value={banPath}
+                onChange={e => {
+                  setBanPath(e.target.value)
+                  setBanError('')
+                }}
+                onBlur={() => checkPath(banPath, setBanError)}
+                placeholder="Ruta BAN"
+              />
+              <input
+                id="ban-folder"
+                type="file"
+                style={{ display: 'none' }}
+                onChange={e => handleFolderChange(e, setBanPath, setBanError, 'BAN')}
+                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                // @ts-ignore: permitir selección de carpetas
+                webkitdirectory=""
+              />
+              <label
+                htmlFor="ban-folder"
+                aria-label="Seleccionar carpeta BAN"
+                tabIndex={0}
+                className="input-group-text btn btn-outline-secondary"
+              >
+                <FaFolderOpen />
+              </label>
+            </div>
+            {banError && <div className="text-danger small mb-2">{banError}</div>}
+            <div className="input-group mb-2">
+              <span className="input-group-text">
+                <FaSearch />
+              </span>
+              <input
+                type="search"
+                className="form-control"
+                value={banSearchTerm}
+                onChange={e => setBanSearchTerm(e.target.value)}
+                placeholder="Buscar..."
+              />
+            </div>
+            <ul
+              className={`list-group flex-grow-1 overflow-auto ${dragOver === 'ban' ? 'drag-over' : ''}`}
+              onDragOver={e => e.preventDefault()}
+              onDragEnter={() => setDragOver('ban')}
+              onDragLeave={() => setDragOver(null)}
+              onDrop={() => handleDrop('ban')}
+            >
+              {Object.entries(filteredGroupedBan)
+                .sort(([a], [b]) => a.localeCompare(b))
+                .map(([letter, items]) => (
+                  <Fragment key={letter}>
+                    <li className="list-group-item letter-header">{letter}</li>
+                    {items.map(item => (
+                      <li
+                        key={item.id}
+                        className="list-group-item d-flex justify-content-between align-items-center"
+                        draggable
+                        onDragStart={() => setDraggedItem({ item, from: 'ban' })}
+                        onDragEnd={() => setDraggedItem(null)}
+                      >
+                        <span>{item.name}</span>
+                        <button
+                          type="button"
+                          className="btn btn-sm btn-outline-danger"
+                          onClick={() => removeBan(item.id)}
+                          aria-label={`Eliminar ${item.name}`}
+                        >
+                          <FaTrash />
+                        </button>
+                      </li>
+                    ))}
+                  </Fragment>
                 ))}
-              </Fragment>
-            ))}
-        </ul>
-      </section>
+            </ul>
+          </section>
 
-      <section className="ban-section">
-        <div className="path-input">
-          <FaFolder className="input-icon" />
-          <input
-            type="text"
-            value={unbanPath}
-            readOnly={false}
-            onChange={e => {
-              setUnbanPath(e.target.value)
-              setUnbanError('')
-            }}
-            onBlur={() => checkPath(unbanPath, setUnbanError)}
-            placeholder="Ruta UNBAN"
-          />
-          <input
-            id="unban-folder"
-            type="file"
-            style={{ display: 'none' }}
-            onChange={e => handleFolderChange(e, setUnbanPath, setUnbanError, 'UNBAN')}
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-ignore: permitir selección de carpetas
-            webkitdirectory=""
-          />
-          <label htmlFor="unban-folder" aria-label="Seleccionar carpeta UNBAN" tabIndex={0}>
-            <FaFolderOpen />
-          </label>
-        </div>
-        {unbanError && <span className="error-message">{unbanError}</span>}
-        <div className="search-input">
-          <FaSearch className="input-icon" />
-          <input
-            type="search"
-            value={unbanSearchTerm}
-            onChange={e => setUnbanSearchTerm(e.target.value)}
-            placeholder="Buscar..."
-          />
-        </div>
-        <ul
-          className={`item-list ${dragOver === 'unban' ? 'drag-over' : ''}`}
-          onDragOver={e => e.preventDefault()}
-          onDragEnter={() => setDragOver('unban')}
-          onDragLeave={() => setDragOver(null)}
-          onDrop={() => handleDrop('unban')}
-        >
-          {Object.entries(filteredGroupedUnban)
-            .sort(([a], [b]) => a.localeCompare(b))
-            .map(([letter, items]) => (
-              <Fragment key={letter}>
-                <li className="letter-header">{letter}</li>
-                {items.map(item => (
-                  <li
-                    key={item.id}
-                    className="item-row"
-                    draggable
-                    onDragStart={() => setDraggedItem({ item, from: 'unban' })}
-                    onDragEnd={() => setDraggedItem(null)}
-                  >
-                    <span>{item.name}</span>
-                    <button
-                      type="button"
-                      className="item-remove"
-                      onClick={() => removeUnban(item.id)}
-                      aria-label={`Eliminar ${item.name}`}
-                    >
-                      <FaTrash />
-                    </button>
-                  </li>
+          <section className="col-md-6 d-flex flex-column">
+            <div className="input-group mb-2">
+              <span className="input-group-text">
+                <FaFolder />
+              </span>
+              <input
+                type="text"
+                className="form-control"
+                value={unbanPath}
+                onChange={e => {
+                  setUnbanPath(e.target.value)
+                  setUnbanError('')
+                }}
+                onBlur={() => checkPath(unbanPath, setUnbanError)}
+                placeholder="Ruta UNBAN"
+              />
+              <input
+                id="unban-folder"
+                type="file"
+                style={{ display: 'none' }}
+                onChange={e => handleFolderChange(e, setUnbanPath, setUnbanError, 'UNBAN')}
+                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                // @ts-ignore: permitir selección de carpetas
+                webkitdirectory=""
+              />
+              <label
+                htmlFor="unban-folder"
+                aria-label="Seleccionar carpeta UNBAN"
+                tabIndex={0}
+                className="input-group-text btn btn-outline-secondary"
+              >
+                <FaFolderOpen />
+              </label>
+            </div>
+            {unbanError && <div className="text-danger small mb-2">{unbanError}</div>}
+            <div className="input-group mb-2">
+              <span className="input-group-text">
+                <FaSearch />
+              </span>
+              <input
+                type="search"
+                className="form-control"
+                value={unbanSearchTerm}
+                onChange={e => setUnbanSearchTerm(e.target.value)}
+                placeholder="Buscar..."
+              />
+            </div>
+            <ul
+              className={`list-group flex-grow-1 overflow-auto ${dragOver === 'unban' ? 'drag-over' : ''}`}
+              onDragOver={e => e.preventDefault()}
+              onDragEnter={() => setDragOver('unban')}
+              onDragLeave={() => setDragOver(null)}
+              onDrop={() => handleDrop('unban')}
+            >
+              {Object.entries(filteredGroupedUnban)
+                .sort(([a], [b]) => a.localeCompare(b))
+                .map(([letter, items]) => (
+                  <Fragment key={letter}>
+                    <li className="list-group-item letter-header">{letter}</li>
+                    {items.map(item => (
+                      <li
+                        key={item.id}
+                        className="list-group-item d-flex justify-content-between align-items-center"
+                        draggable
+                        onDragStart={() => setDraggedItem({ item, from: 'unban' })}
+                        onDragEnd={() => setDraggedItem(null)}
+                      >
+                        <span>{item.name}</span>
+                        <button
+                          type="button"
+                          className="btn btn-sm btn-outline-danger"
+                          onClick={() => removeUnban(item.id)}
+                          aria-label={`Eliminar ${item.name}`}
+                        >
+                          <FaTrash />
+                        </button>
+                      </li>
+                    ))}
+                  </Fragment>
                 ))}
-              </Fragment>
-            ))}
-        </ul>
-      </section>
+            </ul>
+          </section>
+        </div>
       </div>
-      <footer className="ban-footer">Información de la pantalla BAN/UNBAN</footer>
+      <footer className="text-center mt-3 border-top pt-2">
+        Información de la pantalla BAN/UNBAN
+      </footer>
       {toast && <Toast message={toast} onClose={() => setToast('')} />}
       {lastRemoved && (
-        <button type="button" className="undo-button" onClick={undoRemove}>
+        <button
+          type="button"
+          className="btn btn-secondary position-fixed bottom-0 end-0 m-3"
+          onClick={undoRemove}
+        >
           Deshacer
         </button>
       )}
